@@ -6,6 +6,15 @@
    ============================================================ */
 
 /* ----------------------------------------------------------
+   CONFIGURE ME: Google Sheets integration
+   After following the steps in google-apps-script.js, paste
+   your deployed Apps Script web app URL here.
+   Leave blank to skip order logging (site still works fine).
+   ---------------------------------------------------------- */
+const SHEETS_WEBHOOK_URL = '';
+// Example: 'https://script.google.com/macros/s/AKfycbxXXXXXX/exec'
+
+/* ----------------------------------------------------------
    CONFIGURE ME: Update your payment handles here
    ---------------------------------------------------------- */
 const PAYMENT_CONFIG = {
@@ -546,10 +555,11 @@ function placeOrder() {
   if (state.cart.length === 0) return;
 
   const customerName = state.cart[0].customerName || 'Friend';
+  const customerEmail = state.cart[0].customerEmail || '';
   const total = cartTotal();
   const items = [...state.cart];
 
-  state.orderSuccess = { customerName, total, items };
+  state.orderSuccess = { customerName, customerEmail, total, items };
   state.cart = [];
   closeCart();
 
@@ -559,6 +569,42 @@ function placeOrder() {
 
   document.getElementById('success-screen').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  /* Log order to Google Sheets (silent — never blocks the UI) */
+  submitOrderToSheets({ customerName, customerEmail, total, items });
+}
+
+function submitOrderToSheets({ customerName, customerEmail, total, items }) {
+  if (!SHEETS_WEBHOOK_URL) return; /* not configured yet — skip silently */
+
+  const orderDate = new Date().toLocaleString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true
+  });
+
+  const itemsSummary = items
+    .map(i => `${i.name} x${i.qty}${i.topper ? ' (+' + i.topper + ')' : ''}`)
+    .join(', ');
+
+  const payload = {
+    date:     orderDate,
+    name:     customerName,
+    email:    customerEmail,
+    items:    itemsSummary,
+    total:    total.toFixed(2),
+    paid:     'No',      /* you'll mark this Yes in the sheet once payment arrives */
+    notes:    items.map(i => i.note).filter(Boolean).join('; ')
+  };
+
+  /* Use no-cors — we don't need a response, just fire and forget */
+  fetch(SHEETS_WEBHOOK_URL, {
+    method:  'POST',
+    mode:    'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload)
+  }).catch(() => {
+    /* Fail silently — a logging hiccup should never affect the buyer's experience */
+  });
 }
 
 function renderSuccessScreen() {

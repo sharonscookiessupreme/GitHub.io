@@ -70,12 +70,30 @@ Add, remove, or edit entries as needed. Occasions must be one of:
 
 ```
 cookie-fundraiser/
-├── index.html    ← page structure
-├── style.css     ← all styling
-├── app.js        ← data, logic, and interactivity
-└── images/       ← create this folder when you have photos
+├── index.html              ← page structure
+├── style.css               ← all styling
+├── app.js                  ← data, logic, and interactivity
+├── google-apps-script.js   ← paste into Google Apps Script (see below)
+└── images/                 ← create this folder when you have photos
     └── (your cookie photos)
 ```
+
+---
+
+## Setting up Google Sheets Order Logging (optional but recommended)
+
+Every order can be automatically logged to a private Google Sheet that only you can see. Setup takes about 15 minutes and is completely free.
+
+Full step-by-step instructions are written inside `google-apps-script.js` — open that file and read the top section. The short version:
+
+1. Create a new Google Sheet with headers: `Date | Name | Email | Items | Total | Paid | Notes | Order #`
+2. Open **Extensions → Apps Script** in that sheet
+3. Paste the contents of `google-apps-script.js` into the editor and save
+4. Deploy it as a **Web App** (Execute as: Me, Access: Anyone)
+5. Copy the web app URL and paste it into `app.js` as `SHEETS_WEBHOOK_URL`
+6. Re-upload `app.js` to GitHub
+
+Once live, every order fires silently to your sheet. You mark the **Paid** column yourself when payment arrives — that's your whole confirmation workflow.
 
 ---
 
