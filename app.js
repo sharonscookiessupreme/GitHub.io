@@ -1,160 +1,103 @@
 /* ============================================================
    COOKIE FUNDRAISER — app.js
-   ============================================================
-   SETUP: Search for "CONFIGURE ME" to find all values you
-   need to update before going live.
    ============================================================ */
 
 /* ----------------------------------------------------------
-   CONFIGURE ME: Google Sheets integration
-   After following the steps in google-apps-script.js, paste
-   your deployed Apps Script web app URL here.
-   Leave blank to skip order logging (site still works fine).
+   CONFIGURE ME: Google Sheets webhook URL
    ---------------------------------------------------------- */
 const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyDgpairdfEc0x4T4RWFHvkAE_mPiimbooz2RFkMEHsu9_VDOjChHR-YWXMw-fJBOZt/exec';
-// Example: 'https://script.google.com/macros/s/AKfycbxXXXXXX/exec'
 
 /* ----------------------------------------------------------
-   CONFIGURE ME: Update your payment handles here
+   INVENTORY — shared counter across all cookie types
+   Max 125 "slots". Cookie Flower = 2 slots, everything else = 1.
    ---------------------------------------------------------- */
-const PAYMENT_CONFIG = {
-  cashapp: {
-    handle: '$YourCashtag',               // e.g. '$SharonsSweets'
-    link:   'https://cash.app/$YourCashtag'
-  },
-  venmo: {
-    handle: '@YourVenmo',                 // e.g. '@SharonsSweets'
-    link:   'https://venmo.com/YourVenmo'
-  },
-  email: 'sharonscookiessupreme@gmail.com'
-};
+const MAX_INVENTORY = 125;
+let slotsUsed = 0;
+
+function slotsRemaining() { return MAX_INVENTORY - slotsUsed; }
+function isSoldOut()       { return slotsRemaining() <= 0; }
 
 /* ----------------------------------------------------------
-   CONFIGURE ME: Edit your cookies here
-   Add, remove, or update any entry.
-
-   Fields:
-     id        – unique number, don't repeat
-     name      – cookie name shown on card
-     occasions – array, any combo of:
-                 'Teacher Appreciation', "Mother's Day", 'Graduation'
-     desc      – short description
-     emoji     – placeholder until you add real photos
-     imageSrc  – path to photo, e.g. 'images/spring-swirl.jpg'
-                 set to '' to use the emoji placeholder
-     price     – number, dollars
-     stock     – starting max orders
-     size      – size label shown in modal
-     topper    – default recommended topper label
+   HERO IMAGE STRIPS — all cookie photos for cycling
    ---------------------------------------------------------- */
-const COOKIES = [
-  {
-    id: 1,
-    name: 'Spring Swirl',
-    occasions: ['Teacher Appreciation', "Mother's Day"],
-    desc: 'Vanilla bean cookie with rose-pink buttercream swirl. A timeless classic.',
-    emoji: '🌸',
-    imageSrc: '',
-    price: 15,
-    stock: 20,
-    size: '6"×6"',
-    topper: 'Spring Flower'
-  },
-  {
-    id: 2,
-    name: 'Golden Grad Cap',
-    occasions: ['Graduation'],
-    desc: 'Rich chocolate cookie with gold fondant grad cap topper.',
-    emoji: '🎓',
-    imageSrc: '',
-    price: 18,
-    stock: 15,
-    size: '6"×6"',
-    topper: 'Diploma scroll'
-  },
-  {
-    id: 3,
-    name: 'Apple for Teacher',
-    occasions: ['Teacher Appreciation'],
-    desc: 'Red velvet cookie topped with cream cheese frosting and an apple fondant.',
-    emoji: '🍎',
-    imageSrc: '',
-    price: 16,
-    stock: 12,
-    size: '6"×6"',
-    topper: 'Chalkboard flag'
-  },
-  {
-    id: 4,
-    name: "Mom's Bouquet",
-    occasions: ["Mother's Day"],
-    desc: 'Lemon lavender cookie with lavender frosting and pressed flower decoration.',
-    emoji: '💐',
-    imageSrc: '',
-    price: 18,
-    stock: 10,
-    size: '6"×6"',
-    topper: 'Floral spray'
-  },
-  {
-    id: 5,
-    name: "Class of '25",
-    occasions: ['Graduation'],
-    desc: 'Funfetti cookie with white chocolate drizzle. Party in every bite.',
-    emoji: '🎉',
-    imageSrc: '',
-    price: 15,
-    stock: 25,
-    size: '6"×6"',
-    topper: 'Year banner'
-  },
-  {
-    id: 6,
-    name: "World's Best",
-    occasions: ['Teacher Appreciation'],
-    desc: "Brown butter chocolate chip — Sharon's secret recipe since 1989.",
-    emoji: '⭐',
-    imageSrc: '',
-    price: 15,
-    stock: 30,
-    size: '6"×6"',
-    topper: 'Star topper'
-  },
-  {
-    id: 7,
-    name: 'Sunday Rose',
-    occasions: ["Mother's Day"],
-    desc: 'Strawberry shortcake cookie with vanilla cream and a handmade sugar rose.',
-    emoji: '🌹',
-    imageSrc: '',
-    price: 18,
-    stock: 8,
-    size: '6"×6"',
-    topper: 'Rose topper'
-  },
-  {
-    id: 8,
-    name: 'Honor Roll',
-    occasions: ['Graduation'],
-    desc: 'M&M cookie with royal blue and gold accents. School colors edition.',
-    emoji: '🏆',
-    imageSrc: '',
-    price: 16,
-    stock: 20,
-    size: '6"×6"',
-    topper: 'Ribbon topper'
-  },
+const HERO_IMAGES = [
+  'images/heart_yellow_teacher.jpg',
+  'images/heart_choc_teacher.jpg',
+  'images/heart_yellow_moms.jpg',
+  'images/heart_choc_moms.jpg',
+  'images/rounds_plain_teacher.jpg',
+  'images/rounds_plain_moms.jpg',
+  'images/rounds_mm_teacher.jpg',
+  'images/rounds_choc_teacher.jpg',
+  'images/rounds_choc_moms.jpg',
+  'images/rounds_yellow_moms.jpg',
+  'images/flower_plain.jpg',
+  'images/flower_teacher.jpg',
+  'images/flower_moms.jpg',
+  'images/heart_choc_plain.jpg',
 ];
 
 /* ----------------------------------------------------------
-   COOKIE TOPPER OPTIONS
+   COOKIE PRODUCTS
+   slots: how many inventory slots each unit costs
    ---------------------------------------------------------- */
-const TOPPER_OPTIONS = [
-  { value: '',              label: 'No topper',    price: 0 },
-  { value: 'He is Risen',   label: 'He is Risen',  price: 0 },
-  { value: 'Easter Bunny',  label: 'Easter Bunny', price: 0 },
-  { value: 'Spring Flower', label: 'Spring Flower (+$1)', price: 1 },
-  { value: 'Happy Easter',  label: 'Happy Easter', price: 0 },
+const PRODUCTS = [
+  /* ---- TEACHER APPRECIATION ---- */
+  {
+    id: 'ta-heart',
+    name: '6" Heart Cookie',
+    section: 'Teacher Appreciation',
+    desc: 'A gorgeous 6-inch heart-shaped chocolate chip cookie — perfect for gifting.',
+    imageSrc: 'images/heart_yellow_teacher.jpg',
+    price: 15,
+    slots: 1,
+  },
+  {
+    id: 'ta-rounds',
+    name: '3 Round Cookies (3.5")',
+    section: 'Teacher Appreciation',
+    desc: 'A set of three 3.5-inch round chocolate chip cookies, individually baked.',
+    imageSrc: 'images/rounds_plain_teacher.jpg',
+    price: 15,
+    slots: 1,
+  },
+  {
+    id: 'ta-flower',
+    name: 'Cookie Flower',
+    section: 'Teacher Appreciation',
+    desc: 'Six 3.5-inch rounds arranged as a stunning cookie bouquet — a showstopper gift.',
+    imageSrc: 'images/flower_teacher.jpg',
+    price: 30,
+    slots: 2,
+  },
+  /* ---- MOTHER'S DAY ---- */
+  {
+    id: 'md-heart',
+    name: '6" Heart Cookie',
+    section: "Mother's Day",
+    desc: 'A gorgeous 6-inch heart-shaped chocolate chip cookie — perfect for Mom.',
+    imageSrc: 'images/heart_yellow_moms.jpg',
+    price: 15,
+    slots: 1,
+  },
+  {
+    id: 'md-rounds',
+    name: '3 Round Cookies (3.5")',
+    section: "Mother's Day",
+    desc: 'A set of three 3.5-inch round chocolate chip cookies, individually baked.',
+    imageSrc: 'images/rounds_plain_moms.jpg',
+    price: 15,
+    slots: 1,
+  },
+  {
+    id: 'md-flower',
+    name: 'Cookie Flower',
+    section: "Mother's Day",
+    desc: 'Six 3.5-inch rounds arranged as a stunning cookie bouquet — the ultimate Mom gift.',
+    imageSrc: 'images/flower_moms.jpg',
+    price: 30,
+    slots: 2,
+  },
 ];
 
 /* ----------------------------------------------------------
@@ -164,119 +107,154 @@ let state = {
   filter: 'All',
   cart: [],
   cartOpen: false,
-  inventory: {},       // { [cookieId]: maxOrders }
-  ordered: {},         // { [cookieId]: totalOrdered }
-  adminOpen: false,
-  activeModal: null,   // cookie object currently in modal
+  activeModal: null,
   modalForm: {
-    name: '',
-    email: '',
+    name: '', email: '',
     qty: 1,
-    topper: '',
+    topper: 'yes',
+    border: 'none',
+    mms: 'none',
     note: ''
   },
   orderSuccess: null,
 };
 
-/* Initialise inventory from COOKIES data */
-COOKIES.forEach(c => {
-  state.inventory[c.id] = c.stock;
-  state.ordered[c.id] = 0;
-});
-
 /* ----------------------------------------------------------
    HELPERS
    ---------------------------------------------------------- */
-function remaining(cookieId) {
-  return state.inventory[cookieId] - state.ordered[cookieId];
-}
+function fmt(n) { return '$' + n.toFixed(2); }
 
-function fmt(n) {
-  return '$' + n.toFixed(2);
-}
-
-function cartTotal() {
-  return state.cart.reduce((sum, item) => sum + item.lineTotal, 0);
-}
-
-function cartCount() {
-  return state.cart.reduce((sum, item) => sum + item.qty, 0);
-}
+function cartTotal()  { return state.cart.reduce((s, i) => s + i.lineTotal, 0); }
+function cartCount()  { return state.cart.reduce((s, i) => s + i.qty, 0); }
+function cartSlots()  { return state.cart.reduce((s, i) => s + (i.slots * i.qty), 0); }
 
 function showToast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(el._timer);
-  el._timer = setTimeout(() => el.classList.remove('show'), 2600);
+  el._timer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+function topperLabel(section) {
+  return section === "Mother's Day" ? 'Happy Mother\'s Day Topper' : 'Best Teacher Ever Topper';
 }
 
 /* ----------------------------------------------------------
-   PAYMENT HANDLES — inject configured values
+   HERO IMAGE STRIPS
    ---------------------------------------------------------- */
-function initPaymentHandles() {
-  const ch = document.getElementById('cashapp-handle');
-  const cl = document.getElementById('cashapp-link');
-  const vh = document.getElementById('venmo-handle');
-  const vl = document.getElementById('venmo-link');
-  if (ch) ch.textContent = PAYMENT_CONFIG.cashapp.handle;
-  if (cl) cl.href = PAYMENT_CONFIG.cashapp.link;
-  if (vh) vh.textContent = PAYMENT_CONFIG.venmo.handle;
-  if (vl) vl.href = PAYMENT_CONFIG.venmo.link;
+function initHeroStrips() {
+  const left  = document.getElementById('strip-left');
+  const right = document.getElementById('strip-right');
+  if (!left || !right) return;
+
+  /* Shuffle a copy of images so left/right start differently */
+  const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+  const leftImgs  = shuffle(HERO_IMAGES);
+  const rightImgs = shuffle(HERO_IMAGES);
+
+  function buildStrip(el, imgs) {
+    /* Duplicate list for seamless loop */
+    const all = [...imgs, ...imgs];
+    el.innerHTML = all.map(src =>
+      `<div class="strip-slide"><img src="${src}" alt="Cookie" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
+    ).join('');
+  }
+
+  buildStrip(left, leftImgs);
+  buildStrip(right, rightImgs);
+
+  /* CSS animation handles the scroll — no JS interval needed */
+}
+
+/* ----------------------------------------------------------
+   INVENTORY BANNER
+   ---------------------------------------------------------- */
+function updateInventoryBanner() {
+  const rem = slotsRemaining();
+  const el  = document.getElementById('inventory-text');
+  const banner = document.getElementById('inventory-banner');
+  if (!el) return;
+
+  if (rem <= 0) {
+    el.textContent = '⚠️ We\'ve reached our order limit for this fundraiser. Thank you for your support!';
+    banner.classList.add('sold-out-banner');
+  } else if (rem <= 20) {
+    el.textContent = `🔥 Almost full — only ${rem} order slot${rem === 1 ? '' : 's'} remaining!`;
+    banner.classList.add('low-banner');
+  } else {
+    el.textContent = `✅ ${rem} order slots available out of ${MAX_INVENTORY}`;
+    banner.classList.remove('sold-out-banner', 'low-banner');
+  }
 }
 
 /* ----------------------------------------------------------
    COOKIE GRID
    ---------------------------------------------------------- */
 function renderCookieGrid() {
-  const grid = document.getElementById('cookie-grid');
+  const grid    = document.getElementById('cookie-grid');
   const heading = document.getElementById('grid-heading');
+  const sub     = document.getElementById('grid-sub');
+
+  /* Graduation coming soon */
+  if (state.filter === 'Graduation') {
+    heading.textContent = 'Graduation';
+    sub.textContent = '';
+    grid.innerHTML = `
+      <div class="coming-soon-card">
+        <div class="coming-soon-icon">🎓</div>
+        <h3>Coming Soon!</h3>
+        <p>Graduation cookies are on their way. Check back shortly — we'll have special options available for your grad!</p>
+      </div>`;
+    return;
+  }
+
   const filtered = state.filter === 'All'
-    ? COOKIES
-    : COOKIES.filter(c => c.occasions.includes(state.filter));
+    ? PRODUCTS
+    : PRODUCTS.filter(p => p.section === state.filter);
 
-  heading.textContent = state.filter === 'All' ? 'All Cookies' : state.filter + ' Cookies';
+  heading.textContent = state.filter === 'All'
+    ? 'All Cookies'
+    : state.filter === "Mother's Day"
+      ? "Mother's Day 2026"
+      : 'Teacher Appreciation Week';
 
-  grid.innerHTML = filtered.map(c => {
-    const rem = remaining(c.id);
-    const soldOut = rem <= 0;
-    const low = rem > 0 && rem <= 5;
+  sub.textContent = 'Made from scratch · Packaged in bakery boxes · Local pickup';
 
-    const imgMarkup = c.imageSrc
-      ? `<div class="cookie-img"><img src="${c.imageSrc}" alt="${c.name} cookie" loading="lazy"></div>`
-      : `<div class="cookie-img" aria-hidden="true">${c.emoji}</div>`;
+  const totalSoldOut = isSoldOut();
 
-    const stockLabel = soldOut
-      ? `<span class="cookie-stock">Sold out</span>`
-      : low
-        ? `<span class="low-stock">Only ${rem} left!</span>`
-        : `<span class="cookie-stock">${rem} available</span>`;
-
-    const actionBtn = soldOut
-      ? `<button class="sold-out-btn" disabled>Sold out</button>`
-      : `<button class="add-btn" data-id="${c.id}">+ Add</button>`;
+  grid.innerHTML = filtered.map(p => {
+    const slotsNeeded = p.slots;
+    const canOrder    = !totalSoldOut && slotsRemaining() >= slotsNeeded;
+    const slotLabel   = p.slots === 2 ? '(counts as 2 slots)' : '';
 
     return `
       <article class="cookie-card">
-        ${imgMarkup}
+        <div class="cookie-img-wrap">
+          <img class="cookie-img" src="${p.imageSrc}" alt="${p.name}"
+               loading="lazy" onerror="this.src=''; this.parentElement.classList.add('img-fallback')">
+          <div class="cookie-img-fallback-emoji">🍪</div>
+        </div>
         <div class="cookie-info">
-          <div class="cookie-occasion">${c.occasions.join(' · ')}</div>
-          <div class="cookie-name">${c.name}</div>
-          <div class="cookie-desc">${c.desc}</div>
+          <div class="cookie-occasion">${p.section}</div>
+          <div class="cookie-name">${p.name}</div>
+          <div class="cookie-desc">${p.desc}</div>
           <div class="cookie-footer">
             <div>
-              <div class="cookie-price">${fmt(c.price)}</div>
-              ${stockLabel}
+              <div class="cookie-price">${fmt(p.price)}</div>
+              <div class="cookie-stock">${slotLabel}</div>
             </div>
-            ${actionBtn}
+            ${canOrder
+              ? `<button class="add-btn" data-id="${p.id}">+ Add</button>`
+              : `<button class="sold-out-btn" disabled>Sold out</button>`
+            }
           </div>
         </div>
       </article>`;
   }).join('');
 
-  /* Bind add-to-cart buttons */
   grid.querySelectorAll('.add-btn').forEach(btn => {
-    btn.addEventListener('click', () => openModal(parseInt(btn.dataset.id)));
+    btn.addEventListener('click', () => openModal(btn.dataset.id));
   });
 }
 
@@ -298,13 +276,12 @@ function initOccasionFilter() {
    CART
    ---------------------------------------------------------- */
 function renderCart() {
-  const itemsEl = document.getElementById('cart-items');
+  const itemsEl  = document.getElementById('cart-items');
   const footerEl = document.getElementById('cart-footer');
-  const countEl = document.getElementById('cart-count');
-  const totalEl = document.getElementById('cart-total');
-  const count = cartCount();
+  const countEl  = document.getElementById('cart-count');
+  const totalEl  = document.getElementById('cart-total');
+  const count    = cartCount();
 
-  /* Nav badge */
   if (count > 0) {
     countEl.textContent = count;
     countEl.classList.remove('hidden');
@@ -325,16 +302,24 @@ function renderCart() {
   footerEl.classList.remove('hidden');
   totalEl.textContent = fmt(cartTotal());
 
-  itemsEl.innerHTML = state.cart.map((item, i) => `
-    <div class="cart-item">
-      <div class="cart-item-emoji">${item.emoji}</div>
-      <div class="cart-item-body">
-        <div class="cart-item-name">${item.name}</div>
-        <div class="cart-item-meta">Qty: ${item.qty}${item.topper ? ' · Topper: ' + item.topper : ''}${item.note ? ' · ' + item.note : ''}</div>
-        <div class="cart-item-price">${fmt(item.lineTotal)}</div>
-      </div>
-      <button class="cart-remove" data-index="${i}" aria-label="Remove ${item.name}">✕</button>
-    </div>`).join('');
+  itemsEl.innerHTML = state.cart.map((item, i) => {
+    const opts = [
+      item.topper === 'yes' ? topperLabel(item.section) : null,
+      item.border !== 'none' ? item.border.charAt(0).toUpperCase() + item.border.slice(1) + ' border' : null,
+      item.mms === 'add' ? 'M&Ms' : null,
+    ].filter(Boolean).join(', ');
+
+    return `
+      <div class="cart-item">
+        <div class="cart-item-emoji">🍪</div>
+        <div class="cart-item-body">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-meta">${item.section} · Qty: ${item.qty}${opts ? ' · ' + opts : ''}</div>
+          <div class="cart-item-price">${fmt(item.lineTotal)}</div>
+        </div>
+        <button class="cart-remove" data-index="${i}" aria-label="Remove ${item.name}">✕</button>
+      </div>`;
+  }).join('');
 
   itemsEl.querySelectorAll('.cart-remove').forEach(btn => {
     btn.addEventListener('click', () => removeCartItem(parseInt(btn.dataset.index)));
@@ -343,10 +328,11 @@ function renderCart() {
 
 function removeCartItem(index) {
   const item = state.cart[index];
-  state.ordered[item.cookieId] -= item.qty;
+  slotsUsed -= item.slots * item.qty;
   state.cart.splice(index, 1);
   renderCart();
   renderCookieGrid();
+  updateInventoryBanner();
   showToast('Item removed from cart');
 }
 
@@ -354,14 +340,12 @@ function openCart() {
   state.cartOpen = true;
   document.getElementById('cart-panel').classList.add('open');
   document.getElementById('cart-overlay').classList.remove('hidden');
-  document.getElementById('cart-overlay').setAttribute('aria-hidden', 'false');
 }
 
 function closeCart() {
   state.cartOpen = false;
   document.getElementById('cart-panel').classList.remove('open');
   document.getElementById('cart-overlay').classList.add('hidden');
-  document.getElementById('cart-overlay').setAttribute('aria-hidden', 'true');
 }
 
 function initCart() {
@@ -376,53 +360,43 @@ function initCart() {
 /* ----------------------------------------------------------
    MODAL
    ---------------------------------------------------------- */
-function openModal(cookieId) {
-  const cookie = COOKIES.find(c => c.id === cookieId);
-  if (!cookie) return;
-  state.activeModal = cookie;
-  state.modalForm = { name: '', email: '', qty: 1, topper: '', note: '' };
+function openModal(productId) {
+  const product = PRODUCTS.find(p => p.id === productId);
+  if (!product) return;
+  state.activeModal = product;
+  state.modalForm   = { name: '', email: '', qty: 1, topper: 'yes', border: 'none', mms: 'none', note: '' };
   renderModal();
   document.getElementById('modal-overlay').classList.remove('hidden');
-  document.getElementById('modal-overlay').setAttribute('aria-hidden', 'false');
-  document.getElementById('modal-name').focus();
+  setTimeout(() => document.getElementById('modal-name') && document.getElementById('modal-name').focus(), 50);
 }
 
 function closeModal() {
   state.activeModal = null;
   document.getElementById('modal-overlay').classList.add('hidden');
-  document.getElementById('modal-overlay').setAttribute('aria-hidden', 'true');
 }
 
 function renderModal() {
-  const c = state.activeModal;
-  if (!c) return;
-
-  const rem = remaining(c.id);
-  const maxQty = Math.min(rem, 10);
-  const topperPrice = TOPPER_OPTIONS.find(t => t.value === state.modalForm.topper)?.price || 0;
-  const lineTotal = (c.price + topperPrice) * state.modalForm.qty;
-
-  const topperOpts = TOPPER_OPTIONS.map(t =>
-    `<option value="${t.value}"${state.modalForm.topper === t.value ? ' selected' : ''}>${t.label}</option>`
-  ).join('');
-
-  /* Also add the cookie's own recommended topper if not already in the list */
-  const recAlreadyThere = TOPPER_OPTIONS.some(t => t.value === c.topper);
-  const recOpt = !recAlreadyThere && c.topper
-    ? `<option value="${c.topper}"${state.modalForm.topper === c.topper ? ' selected' : ''}>${c.topper} (recommended)</option>`
-    : '';
+  const p   = state.activeModal;
+  if (!p) return;
+  const rem     = slotsRemaining();
+  const maxQty  = Math.max(1, Math.min(10, Math.floor(rem / p.slots)));
+  const total   = p.price * state.modalForm.qty;
+  const tLabel  = topperLabel(p.section);
 
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-header">
-      <h2 id="modal-title">${c.emoji} ${c.name}</h2>
-      <div class="modal-sub">${c.desc} · ${c.size} · ${fmt(c.price)} each</div>
+      <h2 id="modal-title">🍪 ${p.name}</h2>
+      <div class="modal-sub">${p.section} · ${fmt(p.price)} each${p.slots === 2 ? ' · counts as 2 inventory slots' : ''}</div>
+    </div>
+
+    <div class="modal-img-wrap">
+      <img src="${p.imageSrc}" alt="${p.name}" onerror="this.style.display='none'">
     </div>
 
     <div class="form-group">
       <label for="modal-name">Your name</label>
       <input type="text" id="modal-name" placeholder="Full name" value="${state.modalForm.name}" autocomplete="name">
     </div>
-
     <div class="form-group">
       <label for="modal-email">Email address</label>
       <input type="email" id="modal-email" placeholder="you@email.com" value="${state.modalForm.email}" autocomplete="email">
@@ -431,115 +405,130 @@ function renderModal() {
     <div class="form-group">
       <label>Quantity <span class="label-hint">(max ${maxQty})</span></label>
       <div class="qty-control">
-        <button class="qty-btn" id="qty-minus" aria-label="Decrease quantity">−</button>
+        <button class="qty-btn" id="qty-minus" aria-label="Decrease">−</button>
         <div class="qty-val" id="qty-display">${state.modalForm.qty}</div>
-        <button class="qty-btn" id="qty-plus" aria-label="Increase quantity">+</button>
+        <button class="qty-btn" id="qty-plus" aria-label="Increase">+</button>
       </div>
     </div>
 
     <div class="form-group">
-      <label for="modal-topper">Cookie topper</label>
-      <select id="modal-topper">
-        ${topperOpts}${recOpt}
-      </select>
+      <label>${tLabel}</label>
+      <div class="option-row">
+        <label class="opt-label"><input type="radio" name="topper" value="yes" ${state.modalForm.topper === 'yes' ? 'checked' : ''}> Yes</label>
+        <label class="opt-label"><input type="radio" name="topper" value="no"  ${state.modalForm.topper === 'no'  ? 'checked' : ''}> No</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Frosting Border</label>
+      <div class="option-row">
+        <label class="opt-label"><input type="radio" name="border" value="none"      ${state.modalForm.border === 'none'      ? 'checked' : ''}> None</label>
+        <label class="opt-label"><input type="radio" name="border" value="yellow"    ${state.modalForm.border === 'yellow'    ? 'checked' : ''}> Yellow</label>
+        <label class="opt-label"><input type="radio" name="border" value="chocolate" ${state.modalForm.border === 'chocolate' ? 'checked' : ''}> Chocolate</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>M&amp;Ms</label>
+      <div class="option-row">
+        <label class="opt-label"><input type="radio" name="mms" value="none" ${state.modalForm.mms === 'none' ? 'checked' : ''}> None</label>
+        <label class="opt-label"><input type="radio" name="mms" value="add"  ${state.modalForm.mms === 'add'  ? 'checked' : ''}> Add M&amp;Ms</label>
+      </div>
     </div>
 
     <div class="form-group">
       <label for="modal-note">Special note <span class="label-hint">(optional)</span></label>
-      <textarea id="modal-note" placeholder="Any special requests, name to write, etc.">${state.modalForm.note}</textarea>
+      <textarea id="modal-note" placeholder="Any special requests...">${state.modalForm.note}</textarea>
     </div>
 
     <div class="modal-total">
       <span>Subtotal</span>
-      <span id="modal-total-display">${fmt(lineTotal)}</span>
+      <span id="modal-total-display">${fmt(total)}</span>
     </div>
-
     <div class="modal-actions">
       <button class="btn-cancel" id="modal-cancel">Cancel</button>
       <button class="btn-confirm" id="modal-confirm">Add to cart 🛒</button>
     </div>`;
 
-  /* Bind modal events */
+  /* Bind events */
   document.getElementById('modal-cancel').addEventListener('click', closeModal);
   document.getElementById('modal-close').addEventListener('click', closeModal);
-
-  document.getElementById('modal-name').addEventListener('input', e => {
-    state.modalForm.name = e.target.value;
-  });
-  document.getElementById('modal-email').addEventListener('input', e => {
-    state.modalForm.email = e.target.value;
-  });
-  document.getElementById('modal-note').addEventListener('input', e => {
-    state.modalForm.note = e.target.value;
-  });
-
-  document.getElementById('modal-topper').addEventListener('change', e => {
-    state.modalForm.topper = e.target.value;
-    updateModalTotal();
-  });
-
+  document.getElementById('modal-name').addEventListener('input',  e => { state.modalForm.name  = e.target.value; });
+  document.getElementById('modal-email').addEventListener('input', e => { state.modalForm.email = e.target.value; });
+  document.getElementById('modal-note').addEventListener('input',  e => { state.modalForm.note  = e.target.value; });
   document.getElementById('qty-minus').addEventListener('click', () => changeQty(-1));
-  document.getElementById('qty-plus').addEventListener('click', () => changeQty(1));
+  document.getElementById('qty-plus').addEventListener('click',  () => changeQty(1));
+
+  document.querySelectorAll('input[name="topper"]').forEach(r =>
+    r.addEventListener('change', e => { state.modalForm.topper = e.target.value; updateModalTotal(); }));
+  document.querySelectorAll('input[name="border"]').forEach(r =>
+    r.addEventListener('change', e => { state.modalForm.border = e.target.value; updateModalTotal(); }));
+  document.querySelectorAll('input[name="mms"]').forEach(r =>
+    r.addEventListener('change', e => { state.modalForm.mms = e.target.value; updateModalTotal(); }));
+
   document.getElementById('modal-confirm').addEventListener('click', addToCart);
 }
 
 function updateModalTotal() {
-  const c = state.activeModal;
-  if (!c) return;
-  const topperPrice = TOPPER_OPTIONS.find(t => t.value === state.modalForm.topper)?.price || 0;
-  const lineTotal = (c.price + topperPrice) * state.modalForm.qty;
+  const p = state.activeModal;
+  if (!p) return;
   const el = document.getElementById('modal-total-display');
-  if (el) el.textContent = fmt(lineTotal);
+  if (el) el.textContent = fmt(p.price * state.modalForm.qty);
 }
 
 function changeQty(delta) {
-  const c = state.activeModal;
-  if (!c) return;
-  const rem = remaining(c.id);
-  const maxQty = Math.min(rem, 10);
+  const p = state.activeModal;
+  if (!p) return;
+  const rem    = slotsRemaining();
+  const maxQty = Math.max(1, Math.min(10, Math.floor(rem / p.slots)));
   state.modalForm.qty = Math.max(1, Math.min(maxQty, state.modalForm.qty + delta));
-  const display = document.getElementById('qty-display');
-  if (display) display.textContent = state.modalForm.qty;
+  const d = document.getElementById('qty-display');
+  if (d) d.textContent = state.modalForm.qty;
   updateModalTotal();
 }
 
 function addToCart() {
-  const c = state.activeModal;
-  const { name, email, qty, topper, note } = state.modalForm;
+  const p = state.activeModal;
+  const { name, email, qty, topper, border, mms, note } = state.modalForm;
 
-  if (!name.trim()) { showToast('Please enter your name'); document.getElementById('modal-name').focus(); return; }
+  if (!name.trim())  { showToast('Please enter your name');  document.getElementById('modal-name').focus();  return; }
   if (!email.trim() || !email.includes('@')) { showToast('Please enter a valid email'); document.getElementById('modal-email').focus(); return; }
 
-  const topperPrice = TOPPER_OPTIONS.find(t => t.value === topper)?.price || 0;
-  const lineTotal = (c.price + topperPrice) * qty;
+  const slotsNeeded = p.slots * qty;
+  if (slotsNeeded > slotsRemaining()) {
+    showToast('Not enough slots remaining — reduce quantity'); return;
+  }
+
+  slotsUsed += slotsNeeded;
 
   state.cart.push({
-    cookieId: c.id,
-    name: c.name,
-    emoji: c.emoji,
-    price: c.price + topperPrice,
+    productId: p.id,
+    name:      p.name,
+    section:   p.section,
+    price:     p.price,
+    slots:     p.slots,
     qty,
     topper,
+    border,
+    mms,
     note,
-    customerName: name,
+    customerName:  name,
     customerEmail: email,
-    lineTotal
+    lineTotal: p.price * qty,
   });
 
-  state.ordered[c.id] += qty;
   closeModal();
   renderCart();
   renderCookieGrid();
-  showToast(`${c.name} added to cart! 🍪`);
+  updateInventoryBanner();
+  showToast(`${p.name} added to cart! 🍪`);
   openCart();
 }
 
 function initModal() {
-  /* Close on overlay click */
   document.getElementById('modal-overlay').addEventListener('click', e => {
     if (e.target === document.getElementById('modal-overlay')) closeModal();
   });
-  /* Close on Escape */
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       if (state.activeModal) closeModal();
@@ -549,12 +538,12 @@ function initModal() {
 }
 
 /* ----------------------------------------------------------
-   ORDER PLACEMENT & SUCCESS SCREEN
+   ORDER PLACEMENT & SUCCESS
    ---------------------------------------------------------- */
 function placeOrder() {
   if (state.cart.length === 0) return;
 
-  const customerName = state.cart[0].customerName || 'Friend';
+  const customerName  = state.cart[0].customerName  || 'Friend';
   const customerEmail = state.cart[0].customerEmail || '';
   const total = cartTotal();
   const items = [...state.cart];
@@ -562,33 +551,88 @@ function placeOrder() {
   state.orderSuccess = { customerName, customerEmail, total, items };
   state.cart = [];
   closeCart();
-
   renderCart();
   renderCookieGrid();
+  updateInventoryBanner();
   renderSuccessScreen();
-
   document.getElementById('success-screen').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  /* Log order to Google Sheets (silent — never blocks the UI) */
   submitOrderToSheets({ customerName, customerEmail, total, items });
 }
 
+function renderSuccessScreen() {
+  const { customerName, total, items } = state.orderSuccess;
+
+  document.getElementById('success-message').innerHTML =
+    `Thank you, <strong>${customerName}</strong>! Your order has been placed. Please complete your payment below to confirm — include your name in the payment note.`;
+
+  document.getElementById('success-payment-note').innerHTML =
+    `Send <strong>${fmt(total)}</strong> and include your name <strong>"${customerName}"</strong> in the note.`;
+
+  const rows = items.map(item => {
+    const opts = [
+      item.topper === 'yes' ? topperLabel(item.section) : null,
+      item.border !== 'none' ? item.border + ' border' : null,
+      item.mms === 'add' ? 'M&Ms' : null,
+    ].filter(Boolean).join(', ');
+    return `<div class="success-row">
+      <span>🍪 ${item.name} ×${item.qty}${opts ? '<br><small style="color:#7A4522">' + opts + '</small>' : ''}</span>
+      <span>${fmt(item.lineTotal)}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('success-summary').innerHTML = `
+    <div class="success-detail-title">Order Summary</div>
+    ${rows}
+    <div class="success-row"><span>Total</span><span>${fmt(total)}</span></div>`;
+
+  document.getElementById('success-payment-grid').innerHTML = `
+    <div class="pay-card">
+      <div class="pay-icon">💚</div>
+      <div class="pay-name">Cashapp</div>
+      <div class="pay-handle">$stephreyn89</div>
+      <a href="https://cash.app/$stephreyn89" target="_blank" rel="noopener" class="pay-link">Pay ${fmt(total)}</a>
+    </div>
+    <div class="pay-card">
+      <div class="pay-icon">💙</div>
+      <div class="pay-name">Venmo</div>
+      <div class="pay-handle">@smreynolds11</div>
+      <a href="https://venmo.com/smreynolds11" target="_blank" rel="noopener" class="pay-link">Pay ${fmt(total)}</a>
+    </div>
+    <div class="pay-card">
+      <div class="pay-icon">💰</div>
+      <div class="pay-name">Check / Cash</div>
+      <div class="pay-handle">Email to arrange</div>
+      <a href="mailto:sharonscookiessupreme@gmail.com?subject=Cookie Order - ${encodeURIComponent(customerName)}&body=Hi! I placed an order for ${fmt(total)}. My name is ${encodeURIComponent(customerName)}." class="pay-link">Email us</a>
+    </div>`;
+
+  document.getElementById('back-to-cookies').addEventListener('click', () => {
+    state.orderSuccess = null;
+    document.getElementById('success-screen').classList.add('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/* ----------------------------------------------------------
+   GOOGLE SHEETS SUBMISSION
+   ---------------------------------------------------------- */
 function submitOrderToSheets({ customerName, customerEmail, total, items }) {
-  if (!SHEETS_WEBHOOK_URL) return; /* not configured yet — skip silently */
+  if (!SHEETS_WEBHOOK_URL) return;
 
   const orderDate = new Date().toLocaleString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
     hour: 'numeric', minute: '2-digit', hour12: true
   });
 
-  const itemsSummary = items
-    .map(i => `${i.name} x${i.qty}${i.topper ? ' (+' + i.topper + ')' : ''}`)
-    .join(', ');
+  const itemsSummary = items.map(i => {
+    const opts = [
+      i.topper === 'yes' ? topperLabel(i.section) : null,
+      i.border !== 'none' ? i.border + ' border' : null,
+      i.mms === 'add' ? 'M&Ms' : null,
+    ].filter(Boolean).join('+');
+    return `${i.name} x${i.qty}${opts ? ' (' + opts + ')' : ''}`;
+  }).join(', ');
 
-  /* Send as GET with URL parameters — most reliable way to reach Apps Script
-     from a browser without CORS issues. Data is URL-encoded, not exposed
-     any more than a regular form submission. */
   const params = new URLSearchParams({
     date:  orderDate,
     name:  customerName,
@@ -602,124 +646,18 @@ function submitOrderToSheets({ customerName, customerEmail, total, items }) {
   fetch(`${SHEETS_WEBHOOK_URL}?${params.toString()}`, {
     method: 'GET',
     mode:   'no-cors'
-  }).catch(() => {
-    /* Fail silently — a logging hiccup should never affect the buyer's experience */
-  });
-}
-
-function renderSuccessScreen() {
-  const { customerName, total, items } = state.orderSuccess;
-
-  document.getElementById('success-message').innerHTML =
-    `Thank you, <strong>${customerName}</strong>! Your order has been placed. Please complete your payment below to confirm — include your name in the payment note.`;
-
-  document.getElementById('success-payment-note').innerHTML =
-    `Send <strong>${fmt(total)}</strong> and include your name <strong>"${customerName}"</strong> in the note.`;
-
-  /* Order summary rows */
-  const rows = items.map(item =>
-    `<div class="success-row"><span>${item.emoji} ${item.name} ×${item.qty}</span><span>${fmt(item.lineTotal)}</span></div>`
-  ).join('');
-  document.getElementById('success-summary').innerHTML = `
-    <div class="success-detail-title">Order Summary</div>
-    ${rows}
-    <div class="success-row"><span>Total</span><span>${fmt(total)}</span></div>`;
-
-  /* Payment grid */
-  document.getElementById('success-payment-grid').innerHTML = `
-    <div class="pay-card">
-      <div class="pay-icon">💚</div>
-      <div class="pay-name">Cashapp</div>
-      <div class="pay-handle">${PAYMENT_CONFIG.cashapp.handle}</div>
-      <a href="${PAYMENT_CONFIG.cashapp.link}" target="_blank" rel="noopener" class="pay-link">Pay ${fmt(total)}</a>
-    </div>
-    <div class="pay-card">
-      <div class="pay-icon">💙</div>
-      <div class="pay-name">Venmo</div>
-      <div class="pay-handle">${PAYMENT_CONFIG.venmo.handle}</div>
-      <a href="${PAYMENT_CONFIG.venmo.link}" target="_blank" rel="noopener" class="pay-link">Pay ${fmt(total)}</a>
-    </div>
-    <div class="pay-card">
-      <div class="pay-icon">💜</div>
-      <div class="pay-name">Zelle</div>
-      <div class="pay-handle">Ask for number</div>
-      <span class="pay-note">Message us to arrange</span>
-    </div>
-    <div class="pay-card">
-      <div class="pay-icon">💰</div>
-      <div class="pay-name">Check / Cash</div>
-      <div class="pay-handle">Email to confirm</div>
-      <a href="mailto:${PAYMENT_CONFIG.email}?subject=Cookie Order Payment - ${customerName}&body=Hi! I placed an order for ${fmt(total)}. My name is ${customerName}." class="pay-link">Email us</a>
-    </div>`;
-
-  document.getElementById('back-to-cookies').addEventListener('click', () => {
-    state.orderSuccess = null;
-    document.getElementById('success-screen').classList.add('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
-/* ----------------------------------------------------------
-   ADMIN PANEL
-   ---------------------------------------------------------- */
-function renderAdminGrid() {
-  const grid = document.getElementById('admin-grid');
-  grid.innerHTML = COOKIES.map(c => `
-    <div class="admin-item">
-      <div class="admin-item-name">${c.emoji} ${c.name}</div>
-      <div class="admin-item-orders">Ordered: ${state.ordered[c.id]} / ${state.inventory[c.id]}</div>
-      <div class="admin-stock-row">
-        <input type="number" id="inv-${c.id}" min="0" value="${state.inventory[c.id]}" aria-label="Max orders for ${c.name}">
-        <span>max orders</span>
-      </div>
-      <button class="admin-save" data-id="${c.id}">Save</button>
-    </div>`).join('');
-
-  grid.querySelectorAll('.admin-save').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = parseInt(btn.dataset.id);
-      const val = parseInt(document.getElementById(`inv-${id}`).value);
-      if (!isNaN(val) && val >= 0) {
-        state.inventory[id] = val;
-        renderCookieGrid();
-        renderAdminGrid();
-        showToast('Inventory updated ✓');
-      }
-    });
-  });
-}
-
-function initAdmin() {
-  const toggle = document.getElementById('admin-toggle');
-  const panel  = document.getElementById('admin-panel');
-  const close  = document.getElementById('admin-close');
-
-  toggle.addEventListener('click', () => {
-    state.adminOpen = !state.adminOpen;
-    panel.classList.toggle('hidden', !state.adminOpen);
-    toggle.textContent = state.adminOpen ? '✕ Close' : '⚙ Inventory';
-    if (state.adminOpen) {
-      renderAdminGrid();
-      panel.scrollIntoView({ behavior: 'smooth' });
-    }
-  });
-
-  close.addEventListener('click', () => {
-    state.adminOpen = false;
-    panel.classList.add('hidden');
-    toggle.textContent = '⚙ Inventory';
-  });
+  }).catch(() => { /* fail silently */ });
 }
 
 /* ----------------------------------------------------------
    BOOT
    ---------------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
-  initPaymentHandles();
+  initHeroStrips();
   initOccasionFilter();
   renderCookieGrid();
+  updateInventoryBanner();
   initCart();
   renderCart();
   initModal();
-  initAdmin();
 });

@@ -1168,3 +1168,242 @@ footer {
   .payment-grid { grid-template-columns: 1fr 1fr; }
   .modal { padding: 1.5rem; }
 }
+
+/* ============================================================
+   HERO STRIPS — cycling image columns
+   ============================================================ */
+.hero {
+  display: grid;
+  grid-template-columns: 180px 1fr 180px;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  min-height: 560px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-content {
+  padding: 4rem 2.5rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-strip {
+  height: 100%;
+  min-height: 560px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-strip-left  { border-right: 3px solid var(--border); }
+.hero-strip-right { border-left:  3px solid var(--border); }
+
+/* Inner scrolling container */
+.hero-strip-left  > .strip-inner,
+.hero-strip-right > .strip-inner { display: contents; }
+
+/* Built via JS — uses CSS animation */
+.strip-slide {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.strip-slide img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Animate the strip upward */
+#strip-left  { animation: scroll-up 40s linear infinite; }
+#strip-right { animation: scroll-up 50s linear infinite reverse; }
+
+@keyframes scroll-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+/* Fade edges for polish */
+.hero-strip::before,
+.hero-strip::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 80px;
+  z-index: 2;
+  pointer-events: none;
+}
+.hero-strip::before {
+  top: 0;
+  background: linear-gradient(to bottom, var(--cream), transparent);
+}
+.hero-strip::after {
+  bottom: 0;
+  background: linear-gradient(to top, var(--cream), transparent);
+}
+
+/* ============================================================
+   INVENTORY BANNER
+   ============================================================ */
+.inventory-banner {
+  background: #EEF8F0;
+  border-bottom: 1px solid #C3E6CB;
+  padding: 0.6rem 0;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #2D6A4F;
+}
+.inventory-banner.low-banner {
+  background: #FFF8E7;
+  border-color: #FFD97D;
+  color: #7A5200;
+}
+.inventory-banner.sold-out-banner {
+  background: #FEE2E2;
+  border-color: #FECACA;
+  color: #991B1B;
+}
+
+/* ============================================================
+   COOKIE CARD IMAGE — real photo support
+   ============================================================ */
+.cookie-img-wrap {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #F9EEE8, #FDF0F5);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.cookie-img-wrap img.cookie-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.cookie-card:hover .cookie-img-wrap img.cookie-img {
+  transform: scale(1.04);
+}
+
+/* Emoji fallback sits behind the image */
+.cookie-img-fallback-emoji {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4.5rem;
+  z-index: 0;
+}
+
+.cookie-img-wrap img.cookie-img { position: relative; z-index: 1; }
+
+/* When image fails to load, hide it so emoji shows */
+.cookie-img-wrap.img-fallback img.cookie-img { display: none; }
+
+/* ============================================================
+   MODAL IMAGE
+   ============================================================ */
+.modal-img-wrap {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, #F9EEE8, #FDF0F5);
+}
+.modal-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* ============================================================
+   OPTION ROWS (radio groups in modal)
+   ============================================================ */
+.option-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 6px 0;
+}
+
+.opt-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--brown);
+  cursor: pointer;
+  padding: 6px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  transition: all var(--transition);
+  user-select: none;
+}
+.opt-label:hover { border-color: var(--pink); background: var(--light-pink); }
+.opt-label input[type="radio"] { display: none; }
+.opt-label:has(input:checked) {
+  background: var(--deep-pink);
+  border-color: var(--deep-pink);
+  color: white;
+}
+
+/* ============================================================
+   COMING SOON CARD
+   ============================================================ */
+.coming-soon-card {
+  grid-column: 1 / -1;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 4rem 2rem;
+  text-align: center;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.coming-soon-icon { font-size: 4rem; margin-bottom: 1rem; }
+.coming-soon-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--brown);
+  margin-bottom: 0.75rem;
+}
+.coming-soon-card p {
+  font-size: 0.95rem;
+  color: var(--light-brown);
+  line-height: 1.7;
+}
+
+/* ============================================================
+   RESPONSIVE UPDATES for hero strips
+   ============================================================ */
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 120px 1fr 120px;
+  }
+  .strip-slide img { height: 140px; }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .hero-strip { display: none; }
+  .hero-content { padding: 3rem 1.5rem; }
+}

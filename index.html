@@ -31,20 +31,22 @@
 
   <!-- HERO -->
   <section class="hero">
+    <!-- Left image strip -->
+    <div class="hero-strip hero-strip-left" id="strip-left" aria-hidden="true"></div>
+
+    <!-- Center content -->
     <div class="hero-content">
-      <div class="hero-badge">🍪 Spring Fundraiser 2025</div>
+      <div class="hero-badge">🍪 Spring Fundraiser 2026</div>
       <h1>Cookies baked<br>with <em>love</em> for<br>every occasion</h1>
-      <p>Celebrate Teacher Appreciation Week, Mother's Day &amp; Graduation with homemade cookies from Sharon's secret 1989 recipe. Each 6"×6" cookie is $15, packaged fresh in bakery boxes for local pickup.</p>
+      <p>Celebrate Teacher Appreciation Week, Mother's Day &amp; Graduation with homemade cookies from Sharon's secret 1989 recipe. Cookies are packaged fresh in bakery boxes for local pickup.</p>
       <div class="hero-actions">
         <a href="#cookies" class="btn-primary">Order Now</a>
         <a href="#how-it-works" class="btn-secondary">How it works</a>
       </div>
     </div>
-    <div class="hero-decoration" aria-hidden="true">
-      <div class="deco-circle deco-1"></div>
-      <div class="deco-circle deco-2"></div>
-      <div class="hero-emoji">🍪</div>
-    </div>
+
+    <!-- Right image strip -->
+    <div class="hero-strip hero-strip-right" id="strip-right" aria-hidden="true"></div>
   </section>
 
   <!-- HOW IT WORKS -->
@@ -65,7 +67,7 @@
           <div class="step-num">2</div>
           <div class="step-icon">💳</div>
           <h3>Send payment</h3>
-          <p>Pay via Cashapp, Venmo, Zelle, or check. Include your name in the note.</p>
+          <p>Pay via Cashapp or Venmo. Include your name in the note.</p>
         </div>
         <div class="step-card">
           <div class="step-num">3</div>
@@ -92,16 +94,21 @@
     </div>
   </div>
 
+  <!-- INVENTORY BANNER -->
+  <div class="inventory-banner" id="inventory-banner">
+    <div class="container">
+      <span id="inventory-text">Loading availability...</span>
+    </div>
+  </div>
+
   <!-- COOKIE GRID -->
   <section class="cookies-section">
     <div class="container">
       <div class="section-header">
         <h2 id="grid-heading">All Cookies</h2>
-        <p>Made from scratch · Packaged in bakery boxes · Local pickup</p>
+        <p id="grid-sub">Made from scratch · Packaged in bakery boxes · Local pickup</p>
       </div>
-      <div class="cookie-grid" id="cookie-grid">
-        <!-- Rendered by JS -->
-      </div>
+      <div class="cookie-grid" id="cookie-grid"></div>
     </div>
   </section>
 
@@ -111,26 +118,20 @@
       <div class="payment-section">
         <div class="payment-header">
           <h2>💳 How to pay</h2>
-          <p>After placing your order, send payment using any option below. <strong>Include your name</strong> in the payment note so we can match it to your order!</p>
+          <p>After placing your order, send payment using either option below. <strong>Include your name</strong> in the payment note so we can match it to your order!</p>
         </div>
         <div class="payment-grid">
           <div class="pay-card">
             <div class="pay-icon">💚</div>
             <div class="pay-name">Cashapp</div>
-            <div class="pay-handle" id="cashapp-handle">$YourCashtag</div>
-            <a href="#" class="pay-link" id="cashapp-link">Pay with Cashapp</a>
+            <div class="pay-handle">$stephreyn89</div>
+            <a href="https://cash.app/$stephreyn89" target="_blank" rel="noopener" class="pay-link">Pay with Cashapp</a>
           </div>
           <div class="pay-card">
             <div class="pay-icon">💙</div>
             <div class="pay-name">Venmo</div>
-            <div class="pay-handle" id="venmo-handle">@YourVenmo</div>
-            <a href="#" class="pay-link" id="venmo-link">Pay with Venmo</a>
-          </div>
-          <div class="pay-card">
-            <div class="pay-icon">💜</div>
-            <div class="pay-name">Zelle</div>
-            <div class="pay-handle">Ask for phone number</div>
-            <span class="pay-note">Send us a message to pay via Zelle</span>
+            <div class="pay-handle">@smreynolds11</div>
+            <a href="https://venmo.com/smreynolds11" target="_blank" rel="noopener" class="pay-link">Pay with Venmo</a>
           </div>
           <div class="pay-card">
             <div class="pay-icon">💰</div>
@@ -150,7 +151,7 @@
       <div class="footer-inner">
         <div class="logo">Cookie<span>♡</span>Fundraiser</div>
         <p>Homemade with love · Local pickup only · Not a licensed bakery</p>
-        <p style="margin-top:4px;font-size:0.8rem;opacity:0.6">© 2025 Cookie Fundraiser</p>
+        <p style="margin-top:4px;font-size:0.8rem;opacity:0.6">© 2026 Cookie Fundraiser</p>
       </div>
     </div>
   </footer>
@@ -162,16 +163,14 @@
       <h3>Your Cart</h3>
       <button class="close-btn" id="cart-close" aria-label="Close cart">✕</button>
     </div>
-    <div id="cart-items" class="cart-items">
-      <!-- Rendered by JS -->
-    </div>
+    <div id="cart-items" class="cart-items"></div>
     <div id="cart-footer" class="cart-footer hidden">
       <div class="cart-subtotal">
         <span>Total</span>
         <span id="cart-total">$0.00</span>
       </div>
       <div class="checkout-note">
-        🍪 After placing your order, you'll see payment instructions. Send payment via Cashapp, Venmo, Zelle, or check — include your name in the note!
+        🍪 After placing your order, you'll see payment instructions. Send payment via Cashapp or Venmo — include your name in the note!
       </div>
       <button class="btn-primary btn-full" id="place-order-btn">Place Order →</button>
     </div>
@@ -181,9 +180,7 @@
   <div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal" id="modal-box">
       <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
-      <div id="modal-content">
-        <!-- Rendered by JS -->
-      </div>
+      <div id="modal-content"></div>
     </div>
   </div>
 
@@ -198,9 +195,7 @@
         <div class="success-payment">
           <h3>💳 Complete your payment</h3>
           <p id="success-payment-note"></p>
-          <div class="payment-grid" id="success-payment-grid">
-            <!-- Rendered by JS -->
-          </div>
+          <div class="payment-grid" id="success-payment-grid"></div>
         </div>
         <button class="btn-secondary" id="back-to-cookies">← Back to cookies</button>
       </div>
@@ -209,21 +204,6 @@
 
   <!-- TOAST -->
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
-
-  <!-- ADMIN PANEL TOGGLE -->
-  <button class="admin-toggle" id="admin-toggle" title="Manage inventory">⚙ Inventory</button>
-  <section id="admin-panel" class="admin-panel hidden">
-    <div class="container">
-      <div class="admin-header">
-        <h2>⚙ Inventory Management</h2>
-        <button class="btn-secondary btn-sm" id="admin-close">Close</button>
-      </div>
-      <p class="admin-desc">Set the maximum number of orders to accept per cookie. Orders stop once inventory hits zero. Changes are saved in your browser session.</p>
-      <div class="admin-grid" id="admin-grid">
-        <!-- Rendered by JS -->
-      </div>
-    </div>
-  </section>
 
   <script src="app.js"></script>
 </body>
