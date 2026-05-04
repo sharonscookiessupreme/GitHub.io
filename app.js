@@ -11,7 +11,7 @@
    your deployed Apps Script web app URL here.
    Leave blank to skip order logging (site still works fine).
    ---------------------------------------------------------- */
-const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzNvSJL0iBwkavRQHCHF66NLPI8n3S1jzSltlqmPpkN134viELVavxIaplVGBkgWj2K/exec';
+const SHEETS_WEBHOOK_URL = '';
 // Example: 'https://script.google.com/macros/s/AKfycbxXXXXXX/exec'
 
 /* ----------------------------------------------------------
@@ -586,22 +586,22 @@ function submitOrderToSheets({ customerName, customerEmail, total, items }) {
     .map(i => `${i.name} x${i.qty}${i.topper ? ' (+' + i.topper + ')' : ''}`)
     .join(', ');
 
-  const payload = {
-    date:     orderDate,
-    name:     customerName,
-    email:    customerEmail,
-    items:    itemsSummary,
-    total:    total.toFixed(2),
-    paid:     'No',      /* you'll mark this Yes in the sheet once payment arrives */
-    notes:    items.map(i => i.note).filter(Boolean).join('; ')
-  };
+  /* Send as GET with URL parameters — most reliable way to reach Apps Script
+     from a browser without CORS issues. Data is URL-encoded, not exposed
+     any more than a regular form submission. */
+  const params = new URLSearchParams({
+    date:  orderDate,
+    name:  customerName,
+    email: customerEmail,
+    items: itemsSummary,
+    total: total.toFixed(2),
+    paid:  'No',
+    notes: items.map(i => i.note).filter(Boolean).join('; ')
+  });
 
-  /* Use no-cors — we don't need a response, just fire and forget */
-  fetch(SHEETS_WEBHOOK_URL, {
-    method:  'POST',
-    mode:    'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify(payload)
+  fetch(`${SHEETS_WEBHOOK_URL}?${params.toString()}`, {
+    method: 'GET',
+    mode:   'no-cors'
   }).catch(() => {
     /* Fail silently — a logging hiccup should never affect the buyer's experience */
   });
