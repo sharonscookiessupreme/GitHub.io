@@ -11,7 +11,7 @@
    your deployed Apps Script web app URL here.
    Leave blank to skip order logging (site still works fine).
    ---------------------------------------------------------- */
-const SHEETS_WEBHOOK_URL = '';
+const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzNvSJL0iBwkavRQHCHF66NLPI8n3S1jzSltlqmPpkN134viELVavxIaplVGBkgWj2K/exec';
 // Example: 'https://script.google.com/macros/s/AKfycbxXXXXXX/exec'
 
 /* ----------------------------------------------------------
