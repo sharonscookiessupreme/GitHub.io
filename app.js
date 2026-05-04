@@ -153,7 +153,7 @@ function initHeroStrips() {
   /* Build a long row of images — duplicate for seamless loop */
   const all = [...imgs, ...imgs, ...imgs];
   track.innerHTML = all.map(src =>
-    `<img src="${src}" alt="" loading="lazy" onerror="this.style.display='none'">`
+    `<img src="${src}" alt="" loading="lazy" draggable="false">`
   ).join('');
 
   /* Wait for images to load so we know the track width */
@@ -253,8 +253,8 @@ function renderCookieGrid() {
     return `
       <article class="cookie-card">
         <div class="cookie-img-wrap">
-          <img class="cookie-img" src="${p.imageSrc}" alt=""
-               loading="lazy" onerror="this.style.visibility='hidden'; this.parentElement.classList.add('img-fallback')">
+          <img class="cookie-img" src="${p.imageSrc}" alt="" loading="lazy" draggable="false"
+               onerror="this.onerror=null;this.style.visibility='hidden';this.closest('.cookie-img-wrap').classList.add('img-fallback')">
           <div class="cookie-img-fallback-emoji">🍪</div>
         </div>
         <div class="cookie-info">
@@ -339,7 +339,7 @@ function renderCart() {
           <div class="cart-item-meta">${item.section} · Qty: ${item.qty}${opts ? ' · ' + opts : ''}</div>
           <div class="cart-item-price">${fmt(item.lineTotal)}</div>
         </div>
-        <button class="cart-remove" data-index="${i}" aria-label="Remove ${item.name}">✕</button>
+        <button class="cart-remove" data-index="${i}" >✕</button>
       </div>`;
   }).join('');
 
@@ -412,7 +412,7 @@ function renderModal() {
     </div>
 
     <div class="modal-img-wrap">
-      <img src="${p.imageSrc}" alt="" onerror="this.style.display='none'">
+      <img src="${p.imageSrc}" alt="" draggable="false" onerror="this.onerror=null;this.style.display='none'">
     </div>
 
     <div class="form-group">
@@ -427,9 +427,9 @@ function renderModal() {
     <div class="form-group">
       <label>Quantity <span class="label-hint">(max ${maxQty})</span></label>
       <div class="qty-control">
-        <button class="qty-btn" id="qty-minus" aria-label="Decrease">−</button>
+        <button class="qty-btn" id="qty-minus" >−</button>
         <div class="qty-val" id="qty-display">${state.modalForm.qty}</div>
-        <button class="qty-btn" id="qty-plus" aria-label="Increase">+</button>
+        <button class="qty-btn" id="qty-plus" >+</button>
       </div>
     </div>
 

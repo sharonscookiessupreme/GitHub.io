@@ -35,6 +35,11 @@
 }
 
 html { scroll-behavior: smooth; }
+/* Suppress all browser native tooltips site-wide */
+* { -webkit-user-select: none; }
+input, textarea, select { -webkit-user-select: text; }
+[title] { pointer-events: auto; }
+img { pointer-events: none; }
 
 body {
   font-family: var(--font-body);
@@ -1389,32 +1394,33 @@ footer {
 /* ============================================================
    RESPONSIVE UPDATES for hero strips
    ============================================================ */
-/* Tablet — wider text needs wider blur coverage */
-@media (max-width: 900px) {
+/* Tablet portrait (iPad) — near-opaque center, images only peek on edges */
+@media (max-width: 1024px) {
   .hero-blur-mask {
     background:
       linear-gradient(
         to right,
-        rgba(253,246,240,0.05) 0%,
-        rgba(253,246,240,0.88) 18%,
-        rgba(253,246,240,0.96) 50%,
-        rgba(253,246,240,0.88) 82%,
-        rgba(253,246,240,0.05) 100%
+        rgba(253,246,240,0.0)  0%,
+        rgba(253,246,240,0.96) 12%,
+        rgba(253,246,240,0.98) 50%,
+        rgba(253,246,240,0.96) 88%,
+        rgba(253,246,240,0.0)  100%
       );
   }
   .hero-blur-mask::after {
+    left: 0; right: 0;
     mask-image: linear-gradient(
       to right,
       transparent 0%,
-      black 15%,
-      black 85%,
+      black 10%,
+      black 90%,
       transparent 100%
     );
     -webkit-mask-image: linear-gradient(
       to right,
       transparent 0%,
-      black 15%,
-      black 85%,
+      black 10%,
+      black 90%,
       transparent 100%
     );
   }
@@ -1423,7 +1429,7 @@ footer {
 @media (max-width: 640px) {
   .hero-content { padding: 3rem 1.5rem; }
   .hero-blur-mask {
-    background: rgba(253,246,240,0.92);
+    background: rgba(253,246,240,0.96);
   }
   .hero-blur-mask::after { display: none; }
 }
