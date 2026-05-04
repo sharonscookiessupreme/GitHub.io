@@ -144,27 +144,47 @@ function topperLabel(section) {
    HERO IMAGE STRIPS
    ---------------------------------------------------------- */
 function initHeroStrips() {
-  const left  = document.getElementById('strip-left');
-  const right = document.getElementById('strip-right');
-  if (!left || !right) return;
+  const track = document.getElementById('hero-bg-track');
+  if (!track) return;
 
-  /* Shuffle a copy of images so left/right start differently */
-  const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
-  const leftImgs  = shuffle(HERO_IMAGES);
-  const rightImgs = shuffle(HERO_IMAGES);
+  /* Shuffle images for variety */
+  const imgs = [...HERO_IMAGES].sort(() => Math.random() - 0.5);
 
-  function buildStrip(el, imgs) {
-    /* Duplicate list for seamless loop */
-    const all = [...imgs, ...imgs];
-    el.innerHTML = all.map(src =>
-      `<div class="strip-slide"><img src="${src}" alt="Cookie" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
-    ).join('');
+  /* Build a long row of images — duplicate for seamless loop */
+  const all = [...imgs, ...imgs, ...imgs];
+  track.innerHTML = all.map(src =>
+    `<img src="${src}" alt="" loading="lazy" onerror="this.style.display='none'">`
+  ).join('');
+
+  /* Wait for images to load so we know the track width */
+  let startTime = null;
+  let trackWidth = 0;
+
+  function getTrackWidth() {
+    return track.scrollWidth / 3; /* one full set width */
   }
 
-  buildStrip(left, leftImgs);
-  buildStrip(right, rightImgs);
+  /* Smooth pan: moves left at a steady pace, resets seamlessly */
+  const SPEED = 40; /* px per second */
 
-  /* CSS animation handles the scroll — no JS interval needed */
+  function animate(ts) {
+    if (!startTime) {
+      startTime = ts;
+      trackWidth = getTrackWidth();
+    }
+    const elapsed = ts - startTime;
+    const offset  = (elapsed / 1000 * SPEED) % trackWidth;
+    track.style.transform = `translateX(-${offset}px)`;
+    requestAnimationFrame(animate);
+  }
+
+  /* Start once first image loads */
+  const firstImg = track.querySelector('img');
+  if (firstImg && firstImg.complete) {
+    requestAnimationFrame(animate);
+  } else if (firstImg) {
+    firstImg.addEventListener('load', () => requestAnimationFrame(animate));
+  }
 }
 
 /* ----------------------------------------------------------

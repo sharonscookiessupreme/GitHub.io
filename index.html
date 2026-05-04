@@ -31,10 +31,14 @@
 
   <!-- HERO -->
   <section class="hero">
-    <!-- Left image strip -->
-    <div class="hero-strip hero-strip-left" id="strip-left" aria-hidden="true"></div>
+    <!-- Background image layer — absolutely positioned, never affects layout -->
+    <div class="hero-bg" id="hero-bg" aria-hidden="true">
+      <div class="hero-bg-track" id="hero-bg-track"></div>
+      <!-- Blur mask over center text area -->
+      <div class="hero-blur-mask"></div>
+    </div>
 
-    <!-- Center content -->
+    <!-- Content — drives all layout height -->
     <div class="hero-content">
       <div class="hero-badge">🍪 Spring Fundraiser 2026</div>
       <h1>Cookies baked<br>with <em>love</em> for<br>every occasion</h1>
@@ -44,9 +48,6 @@
         <a href="#how-it-works" class="btn-secondary">How it works</a>
       </div>
     </div>
-
-    <!-- Right image strip -->
-    <div class="hero-strip hero-strip-right" id="strip-right" aria-hidden="true"></div>
   </section>
 
   <!-- HOW IT WORKS -->
@@ -153,7 +154,7 @@
     <div class="container">
       <div class="footer-inner">
         <div class="logo">Cookie<span>♡</span>Fundraiser</div>
-        <p>Homemade with love · Local pickup only</p>
+        <p>Homemade with love · Local pickup only · Not a licensed bakery</p>
         <p style="margin-top:4px;font-size:0.8rem;opacity:0.6">© 2026 Cookie Fundraiser</p>
       </div>
     </div>

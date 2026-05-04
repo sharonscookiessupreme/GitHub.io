@@ -177,24 +177,91 @@ a { color: inherit; text-decoration: none; }
 /* --- Hero ------------------------------------------------- */
 .hero {
   background: linear-gradient(135deg, #FDF0F5 0%, #FDF6F0 50%, #F9EEE8 100%);
-  display: grid;
-  grid-template-columns: 180px 1fr 180px;
-  align-items: stretch;
-  overflow: hidden;
   position: relative;
+  overflow: hidden;
 }
 
+/* Content drives ALL height — background layer never pushes layout */
 .hero-content {
-  padding: 3.5rem 2rem 3.5rem;
+  position: relative;
+  z-index: 2;
+  padding: 4.5rem 2rem;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
   max-width: 600px;
   margin: 0 auto;
+}
+
+/* ---- Background image layer ---- */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* The track holds all images side by side and scrolls left */
+.hero-bg-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  display: flex;
+  will-change: transform;
+}
+
+.hero-bg-track img {
+  height: 100%;
+  width: auto;
+  min-width: 340px;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Blur mask — sharp edges left/right, blurred in center behind text */
+.hero-blur-mask {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to right,
+      rgba(253,246,240,0.15) 0%,
+      rgba(253,246,240,0.15) 18%,
+      rgba(253,246,240,0.82) 32%,
+      rgba(253,246,240,0.92) 50%,
+      rgba(253,246,240,0.82) 68%,
+      rgba(253,246,240,0.15) 82%,
+      rgba(253,246,240,0.15) 100%
+    );
+  backdrop-filter: blur(0px);
+}
+
+/* Extra soft blur layer just on the center strip */
+.hero-blur-mask::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 28%; right: 28%;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 20%,
+    black 80%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 20%,
+    black 80%,
+    transparent 100%
+  );
 }
 
 .hero-badge {
@@ -1174,67 +1241,6 @@ footer {
 }
 
 /* ============================================================
-   HERO STRIPS — cycling image columns
-   ============================================================ */
-.hero-strip {
-  height: 100%;
-  max-height: 100%;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-.hero-strip-left  { border-right: 3px solid var(--border); }
-.hero-strip-right { border-left:  3px solid var(--border); }
-
-/* Inner scrolling container */
-.hero-strip-left  > .strip-inner,
-.hero-strip-right > .strip-inner { display: contents; }
-
-/* Built via JS — uses CSS animation */
-.strip-slide {
-  width: 100%;
-  flex-shrink: 0;
-}
-
-.strip-slide img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-}
-
-/* Animate the strip upward */
-#strip-left  { animation: scroll-up 40s linear infinite; }
-#strip-right { animation: scroll-up 50s linear infinite reverse; }
-
-@keyframes scroll-up {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-50%); }
-}
-
-/* Fade edges for polish */
-.hero-strip::before,
-.hero-strip::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0;
-  height: 80px;
-  z-index: 2;
-  pointer-events: none;
-}
-.hero-strip::before {
-  top: 0;
-  background: linear-gradient(to bottom, var(--cream), transparent);
-}
-.hero-strip::after {
-  bottom: 0;
-  background: linear-gradient(to top, var(--cream), transparent);
-}
-
-/* ============================================================
    INVENTORY BANNER
    ============================================================ */
 .inventory-banner {
@@ -1378,18 +1384,7 @@ footer {
 /* ============================================================
    RESPONSIVE UPDATES for hero strips
    ============================================================ */
-@media (max-width: 900px) {
-  .hero {
-    grid-template-columns: 120px 1fr 120px;
-  }
-  .strip-slide img { height: 140px; }
-}
-
 @media (max-width: 640px) {
-  .hero {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-  .hero-strip { display: none; }
   .hero-content { padding: 3rem 1.5rem; }
+  .hero-blur-mask::after { left: 10%; right: 10%; }
 }
