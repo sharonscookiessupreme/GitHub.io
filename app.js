@@ -253,8 +253,8 @@ function renderCookieGrid() {
     return `
       <article class="cookie-card">
         <div class="cookie-img-wrap">
-          <img class="cookie-img" src="${p.imageSrc}" alt="${p.name}"
-               loading="lazy" onerror="this.src=''; this.parentElement.classList.add('img-fallback')">
+          <img class="cookie-img" src="${p.imageSrc}" alt=""
+               loading="lazy" onerror="this.style.visibility='hidden'; this.parentElement.classList.add('img-fallback')">
           <div class="cookie-img-fallback-emoji">🍪</div>
         </div>
         <div class="cookie-info">
@@ -412,7 +412,7 @@ function renderModal() {
     </div>
 
     <div class="modal-img-wrap">
-      <img src="${p.imageSrc}" alt="${p.name}" onerror="this.style.display='none'">
+      <img src="${p.imageSrc}" alt="" onerror="this.style.display='none'">
     </div>
 
     <div class="form-group">
