@@ -178,12 +178,14 @@ function updateInventoryBanner() {
 
   if (rem <= 0) {
     el.textContent = '⚠️ We\'ve reached our order limit for this fundraiser. Thank you for your support!';
+    banner.classList.remove('hidden');
     banner.classList.add('sold-out-banner');
   } else if (rem <= 20) {
-    el.textContent = `🔥 Almost full — only ${rem} order slot${rem === 1 ? '' : 's'} remaining!`;
+    el.textContent = `🔥 Only ${rem} order${rem === 1 ? '' : 's'} left!`;
+    banner.classList.remove('hidden', 'sold-out-banner');
     banner.classList.add('low-banner');
   } else {
-    el.textContent = `✅ ${rem} order slots available out of ${MAX_INVENTORY}`;
+    banner.classList.add('hidden');
     banner.classList.remove('sold-out-banner', 'low-banner');
   }
 }
@@ -242,7 +244,7 @@ function renderCookieGrid() {
           <div class="cookie-footer">
             <div>
               <div class="cookie-price">${fmt(p.price)}</div>
-              <div class="cookie-stock">${slotLabel}</div>
+              <div class="cookie-stock"></div>
             </div>
             ${canOrder
               ? `<button class="add-btn" data-id="${p.id}">+ Add</button>`
@@ -386,7 +388,7 @@ function renderModal() {
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-header">
       <h2 id="modal-title">🍪 ${p.name}</h2>
-      <div class="modal-sub">${p.section} · ${fmt(p.price)} each${p.slots === 2 ? ' · counts as 2 inventory slots' : ''}</div>
+      <div class="modal-sub">${p.section} · ${fmt(p.price)} each</div>
     </div>
 
     <div class="modal-img-wrap">
