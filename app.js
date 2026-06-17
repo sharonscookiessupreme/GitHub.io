@@ -8,6 +8,14 @@
 const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyDgpairdfEc0x4T4RWFHvkAE_mPiimbooz2RFkMEHsu9_VDOjChHR-YWXMw-fJBOZt/exec';
 
 /* ----------------------------------------------------------
+   PICKUP TIMES
+   ---------------------------------------------------------- */
+const PICKUP_TIMES = [
+  'Friday June 20th, 5:00pm – 8:00pm',
+  'Saturday June 21st, 10:00am – 2:00pm',
+];
+
+/* ----------------------------------------------------------
    INVENTORY — shared counter across all cookie types
    Max 125 "slots". Cookie Flower = 2 slots, everything else = 1.
    ---------------------------------------------------------- */
@@ -21,20 +29,14 @@ function isSoldOut()       { return slotsRemaining() <= 0; }
    HERO IMAGE STRIPS — all cookie photos for cycling
    ---------------------------------------------------------- */
 const HERO_IMAGES = [
-  'images/heart_yellow_teacher.jpg',
-  'images/heart_choc_teacher.jpg',
-  'images/heart_yellow_moms.jpg',
-  'images/heart_choc_moms.jpg',
-  'images/rounds_plain_teacher.jpg',
-  'images/rounds_plain_moms.jpg',
-  'images/rounds_mm_teacher.jpg',
-  'images/rounds_choc_teacher.jpg',
-  'images/rounds_choc_moms.jpg',
-  'images/rounds_yellow_moms.jpg',
-  'images/flower_plain.jpg',
-  'images/flower_teacher.jpg',
-  'images/flower_moms.jpg',
-  'images/heart_choc_plain.jpg',
+  'images/fd_topper_super_dad.jpg',
+  'images/fd_topper_fathers_day.jpg',
+  'images/fd_topper_marines.jpg',
+  'images/fd_rounds_placeholder.jpg',
+  'images/fd_topper_super_dad.jpg',
+  'images/fd_topper_fathers_day.jpg',
+  'images/fd_topper_marines.jpg',
+  'images/fd_rounds_placeholder.jpg',
 ];
 
 /* ----------------------------------------------------------
@@ -42,61 +44,32 @@ const HERO_IMAGES = [
    slots: how many inventory slots each unit costs
    ---------------------------------------------------------- */
 const PRODUCTS = [
-  /* ---- TEACHER APPRECIATION ---- */
   {
-    id: 'ta-heart',
-    name: '6" Heart Cookie',
-    section: 'Teacher Appreciation',
-    desc: 'A gorgeous 6-inch heart-shaped chocolate chip cookie — perfect for gifting.',
-    imageSrc: 'images/heart_yellow_teacher.jpg',
+    id: 'fd-super-dad',
+    name: '6\" Round — Super Dad',
+    section: "Father's Day",
+    desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and the "Super Dad" topper. Perfect for any superhero dad.',
+    imageSrc: 'images/fd_topper_super_dad.jpg',
     price: 15,
     slots: 1,
   },
   {
-    id: 'ta-rounds',
-    name: '3 Round Cookies (3.5")',
-    section: 'Teacher Appreciation',
-    desc: 'A set of three 3.5-inch round chocolate chip cookies, individually baked.',
-    imageSrc: 'images/rounds_plain_teacher.jpg',
+    id: 'fd-happy-fd',
+    name: '6\" Round — Happy Father\'s Day',
+    section: "Father's Day",
+    desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and a "Happy Father\'s Day" crown topper.',
+    imageSrc: 'images/fd_topper_fathers_day.jpg',
     price: 15,
     slots: 1,
   },
   {
-    id: 'ta-flower',
-    name: 'Cookie Flower',
-    section: 'Teacher Appreciation',
-    desc: 'Six 3.5-inch rounds arranged as a stunning cookie bouquet — a showstopper gift.',
-    imageSrc: 'images/flower_teacher.jpg',
-    price: 30,
-    slots: 2,
-  },
-  /* ---- MOTHER'S DAY ---- */
-  {
-    id: 'md-heart',
-    name: '6" Heart Cookie',
-    section: "Mother's Day",
-    desc: 'A gorgeous 6-inch heart-shaped chocolate chip cookie — perfect for Mom.',
-    imageSrc: 'images/heart_yellow_moms.jpg',
+    id: 'fd-marines',
+    name: '6\" Round — Marines Edition',
+    section: "Father's Day",
+    desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and a Marine Corps "Happy Father\'s Day" topper. For the dads who served.',
+    imageSrc: 'images/fd_topper_marines.jpg',
     price: 15,
     slots: 1,
-  },
-  {
-    id: 'md-rounds',
-    name: '3 Round Cookies (3.5")',
-    section: "Mother's Day",
-    desc: 'A set of three 3.5-inch round chocolate chip cookies, individually baked.',
-    imageSrc: 'images/rounds_plain_moms.jpg',
-    price: 15,
-    slots: 1,
-  },
-  {
-    id: 'md-flower',
-    name: 'Cookie Flower',
-    section: "Mother's Day",
-    desc: 'Six 3.5-inch rounds arranged as a stunning cookie bouquet — the ultimate Mom gift.',
-    imageSrc: 'images/flower_moms.jpg',
-    price: 30,
-    slots: 2,
   },
 ];
 
@@ -104,7 +77,7 @@ const PRODUCTS = [
    APPLICATION STATE
    ---------------------------------------------------------- */
 let state = {
-  filter: 'All',
+  filter: "Father's Day",
   cart: [],
   cartOpen: false,
   activeModal: null,
@@ -114,7 +87,8 @@ let state = {
     topper: 'yes',
     border: 'none',
     mms: 'none',
-    note: ''
+    note: '',
+    pickupTime: PICKUP_TIMES[0]
   },
   orderSuccess: null,
 };
@@ -337,6 +311,7 @@ function renderCart() {
         <div class="cart-item-body">
           <div class="cart-item-name">${item.name}</div>
           <div class="cart-item-meta">${item.section} · Qty: ${item.qty}${opts ? ' · ' + opts : ''}</div>
+          <div class="cart-item-meta">📅 ${item.pickupTime}</div>
           <div class="cart-item-price">${fmt(item.lineTotal)}</div>
         </div>
         <button class="cart-remove" data-index="${i}" >✕</button>
@@ -386,7 +361,7 @@ function openModal(productId) {
   const product = PRODUCTS.find(p => p.id === productId);
   if (!product) return;
   state.activeModal = product;
-  state.modalForm   = { name: '', email: '', qty: 1, topper: 'yes', border: 'none', mms: 'none', note: '' };
+  state.modalForm   = { name: '', email: '', qty: 1, topper: 'yes', border: 'none', mms: 'none', note: '', pickupTime: PICKUP_TIMES[0] };
   renderModal();
   document.getElementById('modal-overlay').classList.remove('hidden');
   setTimeout(() => document.getElementById('modal-name') && document.getElementById('modal-name').focus(), 50);
@@ -463,6 +438,18 @@ function renderModal() {
       <textarea id="modal-note" placeholder="Any special requests...">${state.modalForm.note}</textarea>
     </div>
 
+    <div class="form-group">
+      <label>📅 Pickup time</label>
+      <div class="option-row pickup-options">
+        ${PICKUP_TIMES.map(t => `
+          <label class="opt-label opt-label-wide">
+            <input type="radio" name="pickup" value="${t}" ${state.modalForm.pickupTime === t ? 'checked' : ''}>
+            ${t}
+          </label>`).join('')}
+      </div>
+      <div class="pickup-address">📍 404 Lake Road, Havelock NC 28532</div>
+    </div>
+
     <div class="modal-total">
       <span>Subtotal</span>
       <span id="modal-total-display">${fmt(total)}</span>
@@ -487,6 +474,9 @@ function renderModal() {
     r.addEventListener('change', e => { state.modalForm.border = e.target.value; updateModalTotal(); }));
   document.querySelectorAll('input[name="mms"]').forEach(r =>
     r.addEventListener('change', e => { state.modalForm.mms = e.target.value; updateModalTotal(); }));
+
+  document.querySelectorAll('input[name="pickup"]').forEach(r =>
+    r.addEventListener('change', e => { state.modalForm.pickupTime = e.target.value; }));
 
   document.getElementById('modal-confirm').addEventListener('click', addToCart);
 }
@@ -523,6 +513,8 @@ function addToCart() {
 
   slotsUsed += slotsNeeded;
 
+  const pickupTime = state.modalForm.pickupTime;
+
   state.cart.push({
     productId: p.id,
     name:      p.name,
@@ -534,6 +526,7 @@ function addToCart() {
     border,
     mms,
     note,
+    pickupTime,
     customerName:  name,
     customerEmail: email,
     lineTotal: p.price * qty,
@@ -606,7 +599,8 @@ function renderSuccessScreen() {
   document.getElementById('success-summary').innerHTML = `
     <div class="success-detail-title">Order Summary</div>
     ${rows}
-    <div class="success-row"><span>Total</span><span>${fmt(total)}</span></div>`;
+    <div class="success-row"><span>Total</span><span>${fmt(total)}</span></div>
+    ${pickupTime ? `<div class="success-pickup-row">📅 <strong>Pickup:</strong> ${pickupTime}<br>📍 404 Lake Road, Havelock NC 28532</div>` : ''}`;
 
   document.getElementById('success-payment-grid').innerHTML = `
     <div class="pay-card">
@@ -655,14 +649,17 @@ function submitOrderToSheets({ customerName, customerEmail, total, items }) {
     return `${i.name} x${i.qty}${opts ? ' (' + opts + ')' : ''}`;
   }).join(', ');
 
+  const pickupTime = items[0] && items[0].pickupTime ? items[0].pickupTime : '';
+
   const params = new URLSearchParams({
-    date:  orderDate,
-    name:  customerName,
-    email: customerEmail,
-    items: itemsSummary,
-    total: total.toFixed(2),
-    paid:  'No',
-    notes: items.map(i => i.note).filter(Boolean).join('; ')
+    date:     orderDate,
+    name:     customerName,
+    email:    customerEmail,
+    items:    itemsSummary,
+    total:    total.toFixed(2),
+    paid:     'No',
+    notes:    items.map(i => i.note).filter(Boolean).join('; '),
+    pickup:   pickupTime
   });
 
   fetch(`${SHEETS_WEBHOOK_URL}?${params.toString()}`, {

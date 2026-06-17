@@ -1433,3 +1433,39 @@ footer {
   }
   .hero-blur-mask::after { display: none; }
 }
+
+/* ============================================================
+   PICKUP TIME SELECTOR
+   ============================================================ */
+.pickup-options {
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.opt-label-wide {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 10px 16px;
+  font-size: 0.875rem;
+}
+
+.pickup-address {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--light-brown);
+  padding: 8px 12px;
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+}
+
+/* Pickup row in success screen */
+.success-pickup-row {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  color: var(--brown);
+  line-height: 1.7;
+  border-top: 1px solid var(--border);
+}
