@@ -29,12 +29,12 @@ function isSoldOut()       { return slotsRemaining() <= 0; }
    HERO IMAGE STRIPS — all cookie photos for cycling
    ---------------------------------------------------------- */
 const HERO_IMAGES = [
-  'images/fd_topper_super_dad.jpg',
-  'images/fd_topper_fathers_day.jpg',
-  'images/fd_topper_marines.jpg',
-  'images/fd_topper_super_dad.jpg',
-  'images/fd_topper_fathers_day.jpg',
-  'images/fd_topper_marines.jpg',
+  'images/fd_topper_super_dad.jpg?v=2',
+  'images/fd_topper_fathers_day.jpg?v=2',
+  'images/fd_topper_marines.jpg?v=2',
+  'images/fd_topper_super_dad.jpg?v=2',
+  'images/fd_topper_fathers_day.jpg?v=2',
+  'images/fd_topper_marines.jpg?v=2',
 ];
 
 /* ----------------------------------------------------------
@@ -47,7 +47,7 @@ const PRODUCTS = [
     name: '6\" Round — Super Dad',
     section: "Father's Day",
     desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and the "Super Dad" topper. Perfect for any superhero dad.',
-    imageSrc: 'images/fd_topper_super_dad.jpg',
+    imageSrc: 'images/fd_topper_super_dad.jpg?v=2',
     price: 15,
     slots: 1,
   },
@@ -56,7 +56,7 @@ const PRODUCTS = [
     name: '6\" Round — Happy Father\'s Day',
     section: "Father's Day",
     desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and a "Happy Father\'s Day" crown topper.',
-    imageSrc: 'images/fd_topper_fathers_day.jpg',
+    imageSrc: 'images/fd_topper_fathers_day.jpg?v=2',
     price: 15,
     slots: 1,
   },
@@ -65,7 +65,7 @@ const PRODUCTS = [
     name: '6\" Round — Marines Edition',
     section: "Father's Day",
     desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and a Marine Corps "Happy Father\'s Day" topper. For the dads who served.',
-    imageSrc: 'images/fd_topper_marines.jpg',
+    imageSrc: 'images/fd_topper_marines.jpg?v=2',
     price: 15,
     slots: 1,
   },
