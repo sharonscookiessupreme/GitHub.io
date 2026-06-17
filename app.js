@@ -5,7 +5,7 @@
 /* ----------------------------------------------------------
    CONFIGURE ME: Google Sheets webhook URL
    ---------------------------------------------------------- */
-const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxVjwa58vGS35D19PtblbunC-SGUKnlyWPCfOANf4GHeE4SyiyBSEW5K921lGW4eUxa/exec';
+const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyDgpairdfEc0x4T4RWFHvkAE_mPiimbooz2RFkMEHsu9_VDOjChHR-YWXMw-fJBOZt/exec';
 
 /* ----------------------------------------------------------
    PICKUP TIMES
@@ -82,9 +82,6 @@ let state = {
   modalForm: {
     name: '', email: '',
     qty: 1,
-    topper: 'yes',
-    border: 'none',
-    mms: 'none',
     note: '',
     pickupTime: PICKUP_TIMES[0]
   },
@@ -277,11 +274,7 @@ function renderCart() {
   totalEl.textContent = fmt(cartTotal());
 
   itemsEl.innerHTML = state.cart.map((item, i) => {
-    const opts = [
-      item.topper === 'yes' ? topperLabel(item.section) : null,
-      item.border !== 'none' ? item.border.charAt(0).toUpperCase() + item.border.slice(1) + ' border' : null,
-      item.mms === 'add' ? 'M&Ms' : null,
-    ].filter(Boolean).join(', ');
+    const opts = null;
 
     return `
       <div class="cart-item">
@@ -339,7 +332,7 @@ function openModal(productId) {
   const product = PRODUCTS.find(p => p.id === productId);
   if (!product) return;
   state.activeModal = product;
-  state.modalForm   = { name: '', email: '', qty: 1, topper: 'yes', border: 'none', mms: 'none', note: '', pickupTime: PICKUP_TIMES[0] };
+  state.modalForm   = { name: '', email: '', qty: 1, note: '', pickupTime: PICKUP_TIMES[0] };
   renderModal();
   document.getElementById('modal-overlay').classList.remove('hidden');
   setTimeout(() => document.getElementById('modal-name') && document.getElementById('modal-name').focus(), 50);
@@ -395,23 +388,6 @@ function renderModal() {
     </div>
 
     <div class="form-group">
-      <label>Frosting Border</label>
-      <div class="option-row">
-        <label class="opt-label"><input type="radio" name="border" value="none"      ${state.modalForm.border === 'none'      ? 'checked' : ''}> None</label>
-        <label class="opt-label"><input type="radio" name="border" value="yellow"    ${state.modalForm.border === 'yellow'    ? 'checked' : ''}> Yellow</label>
-        <label class="opt-label"><input type="radio" name="border" value="chocolate" ${state.modalForm.border === 'chocolate' ? 'checked' : ''}> Chocolate</label>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>M&amp;Ms</label>
-      <div class="option-row">
-        <label class="opt-label"><input type="radio" name="mms" value="none" ${state.modalForm.mms === 'none' ? 'checked' : ''}> None</label>
-        <label class="opt-label"><input type="radio" name="mms" value="add"  ${state.modalForm.mms === 'add'  ? 'checked' : ''}> Add M&amp;Ms</label>
-      </div>
-    </div>
-
-    <div class="form-group">
       <label for="modal-note">Special note <span class="label-hint">(optional)</span></label>
       <textarea id="modal-note" placeholder="Any special requests...">${state.modalForm.note}</textarea>
     </div>
@@ -445,70 +421,6 @@ function renderModal() {
   document.getElementById('modal-note').addEventListener('input',  e => { state.modalForm.note  = e.target.value; });
   document.getElementById('qty-minus').addEventListener('click', () => changeQty(-1));
   document.getElementById('qty-plus').addEventListener('click',  () => changeQty(1));
-
-  document.querySelectorAll('input[name="topper"]').forEach(r =>
-    r.addEventListener('change', e => { state.modalForm.topper = e.target.value; updateModalTotal(); }));
-  document.querySelectorAll('input[name="border"]').forEach(r =>
-    r.addEventListener('change', e => { state.modalForm.border = e.target.value; updateModalTotal(); }));
-  document.querySelectorAll('input[name="mms"]').forEach(r =>
-    r.addEventListener('change', e => { state.modalForm.mms = e.target.value; updateModalTotal(); }));
-
-  document.querySelectorAll('input[name="pickup"]').forEach(r =>
-    r.addEventListener('change', e => { state.modalForm.pickupTime = e.target.value; }));
-
-  document.getElementById('modal-confirm').addEventListener('click', addToCart);
-}
-
-function updateModalTotal() {
-  const p = state.activeModal;
-  if (!p) return;
-  const el = document.getElementById('modal-total-display');
-  if (el) el.textContent = fmt(p.price * state.modalForm.qty);
-}
-
-function changeQty(delta) {
-  const p = state.activeModal;
-  if (!p) return;
-  const rem    = slotsRemaining();
-  const maxQty = Math.max(1, Math.min(10, Math.floor(rem / p.slots)));
-  state.modalForm.qty = Math.max(1, Math.min(maxQty, state.modalForm.qty + delta));
-  const d = document.getElementById('qty-display');
-  if (d) d.textContent = state.modalForm.qty;
-  updateModalTotal();
-}
-
-function addToCart() {
-  const p = state.activeModal;
-  const { name, email, qty, topper, border, mms, note } = state.modalForm;
-
-  if (!name.trim())  { showToast('Please enter your name');  document.getElementById('modal-name').focus();  return; }
-  if (!email.trim() || !email.includes('@')) { showToast('Please enter a valid email'); document.getElementById('modal-email').focus(); return; }
-
-  const slotsNeeded = p.slots * qty;
-  if (slotsNeeded > slotsRemaining()) {
-    showToast('Not enough slots remaining — reduce quantity'); return;
-  }
-
-  slotsUsed += slotsNeeded;
-
-  const pickupTime = state.modalForm.pickupTime;
-
-  state.cart.push({
-    productId: p.id,
-    name:      p.name,
-    section:   p.section,
-    price:     p.price,
-    slots:     p.slots,
-    qty,
-    topper,
-    border,
-    mms,
-    note,
-    pickupTime,
-    customerName:  name,
-    customerEmail: email,
-    lineTotal: p.price * qty,
-  });
 
   closeModal();
   renderCart();
@@ -618,14 +530,7 @@ function submitOrderToSheets({ customerName, customerEmail, total, items }) {
     hour: 'numeric', minute: '2-digit', hour12: true
   });
 
-  const itemsSummary = items.map(i => {
-    const opts = [
-      i.topper === 'yes' ? topperLabel(i.section) : null,
-      i.border !== 'none' ? i.border + ' border' : null,
-      i.mms === 'add' ? 'M&Ms' : null,
-    ].filter(Boolean).join('+');
-    return `${i.name} x${i.qty}${opts ? ' (' + opts + ')' : ''}`;
-  }).join(', ');
+  const itemsSummary = items.map(i => `${i.name} x${i.qty}`).join(', ');
 
   const pickupTime = items[0] && items[0].pickupTime ? items[0].pickupTime : '';
 
