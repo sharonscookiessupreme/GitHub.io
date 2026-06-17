@@ -5,7 +5,7 @@
 /* ----------------------------------------------------------
    CONFIGURE ME: Google Sheets webhook URL
    ---------------------------------------------------------- */
-const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyDgpairdfEc0x4T4RWFHvkAE_mPiimbooz2RFkMEHsu9_VDOjChHR-YWXMw-fJBOZt/exec';
+const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxVjwa58vGS35D19PtblbunC-SGUKnlyWPCfOANf4GHeE4SyiyBSEW5K921lGW4eUxa/exec';
 
 /* ----------------------------------------------------------
    PICKUP TIMES
