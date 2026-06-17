@@ -349,7 +349,6 @@ function renderModal() {
   const rem     = slotsRemaining();
   const maxQty  = Math.max(1, Math.min(10, Math.floor(rem / p.slots)));
   const total   = p.price * state.modalForm.qty;
-  const tLabel  = topperLabel(p.section);
 
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-header">
@@ -379,15 +378,7 @@ function renderModal() {
       </div>
     </div>
 
-    <div class="form-group">
-      <label>${tLabel}</label>
-      <div class="option-row">
-        <label class="opt-label"><input type="radio" name="topper" value="yes" ${state.modalForm.topper === 'yes' ? 'checked' : ''}> Yes</label>
-        <label class="opt-label"><input type="radio" name="topper" value="no"  ${state.modalForm.topper === 'no'  ? 'checked' : ''}> No</label>
-      </div>
-    </div>
-
-    <div class="form-group">
+<div class="form-group">
       <label for="modal-note">Special note <span class="label-hint">(optional)</span></label>
       <textarea id="modal-note" placeholder="Any special requests...">${state.modalForm.note}</textarea>
     </div>
@@ -476,9 +467,6 @@ function renderSuccessScreen() {
 
   const rows = items.map(item => {
     const opts = [
-      item.topper === 'yes' ? topperLabel(item.section) : null,
-      item.border !== 'none' ? item.border + ' border' : null,
-      item.mms === 'add' ? 'M&Ms' : null,
     ].filter(Boolean).join(', ');
     return `<div class="success-row">
       <span>🍪 ${item.name} ×${item.qty}${opts ? '<br><small style="color:#7A4522">' + opts + '</small>' : ''}</span>
