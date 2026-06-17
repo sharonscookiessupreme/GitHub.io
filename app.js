@@ -483,7 +483,7 @@ function addToCart() {
   openCart();
 }
 
-
+function placeOrder() {
   if (state.cart.length === 0) return;
 
   const customerName  = state.cart[0].customerName  || 'Friend';
