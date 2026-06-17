@@ -274,14 +274,12 @@ function renderCart() {
   totalEl.textContent = fmt(cartTotal());
 
   itemsEl.innerHTML = state.cart.map((item, i) => {
-    const opts = null;
-
     return `
       <div class="cart-item">
         <div class="cart-item-emoji">🍪</div>
         <div class="cart-item-body">
           <div class="cart-item-name">${item.name}</div>
-          <div class="cart-item-meta">${item.section} · Qty: ${item.qty}${opts ? ' · ' + opts : ''}</div>
+          <div class="cart-item-meta">${item.section} · Qty: ${item.qty}</div>
           <div class="cart-item-meta">📅 ${item.pickupTime}</div>
           <div class="cart-item-price">${fmt(item.lineTotal)}</div>
         </div>
@@ -505,6 +503,7 @@ function placeOrder() {
 
 function renderSuccessScreen() {
   const { customerName, total, items } = state.orderSuccess;
+  const pickupTime = items[0] && items[0].pickupTime ? items[0].pickupTime : '';
 
   document.getElementById('success-message').innerHTML =
     `Thank you, <strong>${customerName}</strong>! Your order has been placed. Please complete your payment below to confirm — include your name in the payment note.`;
@@ -513,10 +512,8 @@ function renderSuccessScreen() {
     `Send <strong>${fmt(total)}</strong> and include your name <strong>"${customerName}"</strong> in the note.`;
 
   const rows = items.map(item => {
-    const opts = [
-    ].filter(Boolean).join(', ');
     return `<div class="success-row">
-      <span>🍪 ${item.name} ×${item.qty}${opts ? '<br><small style="color:#7A4522">' + opts + '</small>' : ''}</span>
+      <span>🍪 ${item.name} ×${item.qty}</span>
       <span>${fmt(item.lineTotal)}</span>
     </div>`;
   }).join('');
