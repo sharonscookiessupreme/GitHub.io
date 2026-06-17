@@ -29,12 +29,12 @@ function isSoldOut()       { return slotsRemaining() <= 0; }
    HERO IMAGE STRIPS — all cookie photos for cycling
    ---------------------------------------------------------- */
 const HERO_IMAGES = [
-  'images/fd_topper_super_dad.png',
-  'images/fd_topper_fathers_day.png',
-  'images/fd_topper_marines.png',
-  'images/fd_topper_super_dad.png',
-  'images/fd_topper_fathers_day.png',
-  'images/fd_topper_marines.png',
+  'images/fd_topper_super_dad.jpg',
+  'images/fd_topper_fathers_day.jpg',
+  'images/fd_topper_marines.jpg',
+  'images/fd_topper_super_dad.jpg',
+  'images/fd_topper_fathers_day.jpg',
+  'images/fd_topper_marines.jpg',
 ];
 
 /* ----------------------------------------------------------
@@ -47,7 +47,7 @@ const PRODUCTS = [
     name: '6\" Round — Super Dad',
     section: "Father's Day",
     desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and the "Super Dad" topper. Perfect for any superhero dad.',
-    imageSrc: 'images/fd_topper_super_dad.png',
+    imageSrc: 'images/fd_topper_super_dad.jpg',
     price: 15,
     slots: 1,
   },
@@ -56,7 +56,7 @@ const PRODUCTS = [
     name: '6\" Round — Happy Father\'s Day',
     section: "Father's Day",
     desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and a "Happy Father\'s Day" crown topper.',
-    imageSrc: 'images/fd_topper_fathers_day.png',
+    imageSrc: 'images/fd_topper_fathers_day.jpg',
     price: 15,
     slots: 1,
   },
@@ -65,7 +65,7 @@ const PRODUCTS = [
     name: '6\" Round — Marines Edition',
     section: "Father's Day",
     desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and a Marine Corps "Happy Father\'s Day" topper. For the dads who served.',
-    imageSrc: 'images/fd_topper_marines.png',
+    imageSrc: 'images/fd_topper_marines.jpg',
     price: 15,
     slots: 1,
   },
@@ -125,7 +125,7 @@ function initHeroStrips() {
   /* Build a long row of images — duplicate for seamless loop */
   const all = [...imgs, ...imgs, ...imgs];
   track.innerHTML = all.map(src =>
-    `<img src="${src}" alt="" loading="lazy" draggable="false">`
+    `<img src="${src}" alt="" draggable="false" loading="eager">`
   ).join('');
 
   /* Wait for images to load so we know the track width */
@@ -206,8 +206,7 @@ function renderCookieGrid() {
     return `
       <article class="cookie-card">
         <div class="cookie-img-wrap">
-          <img class="cookie-img" src="${p.imageSrc}" alt="" loading="lazy" draggable="false"
-               onerror="this.onerror=null;this.style.visibility='hidden';this.closest('.cookie-img-wrap').classList.add('img-fallback')">
+          <img class="cookie-img" src="${p.imageSrc}" alt="" draggable="false">
           <div class="cookie-img-fallback-emoji">🍪</div>
         </div>
         <div class="cookie-info">
@@ -366,7 +365,7 @@ function renderModal() {
     </div>
 
     <div class="modal-img-wrap">
-      <img src="${p.imageSrc}" alt="" draggable="false" onerror="this.onerror=null;this.style.display='none'">
+      <img src="${p.imageSrc}" alt="" draggable="false">
     </div>
 
     <div class="form-group">
