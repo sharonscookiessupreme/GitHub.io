@@ -5,7 +5,7 @@
 /* ----------------------------------------------------------
    CONFIGURE ME: Google Sheets webhook URL
    ---------------------------------------------------------- */
-const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxVjwa58vGS35D19PtblbunC-SGUKnlyWPCfOANf4GHeE4SyiyBSEW5K921lGW4eUxa/exec';
+const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyV1dnJ5nFgWjvHstYK6WAXR-kOneNNT2icXkS9_r3Hyf3vZme_dSqrnc5_1SPKg-Gr/exec';
 
 /* ----------------------------------------------------------
    PICKUP TIMES
@@ -502,11 +502,11 @@ function placeOrder() {
 }
 
 function renderSuccessScreen() {
-  const { customerName, total, items } = state.orderSuccess;
+  const { customerName, customerEmail, total, items } = state.orderSuccess;
   const pickupTime = items[0] && items[0].pickupTime ? items[0].pickupTime : '';
 
   document.getElementById('success-message').innerHTML =
-    `Thank you, <strong>${customerName}</strong>! Your order has been placed. Please complete your payment below to confirm — include your name in the payment note.`;
+    `Thank you, <strong>${customerName}</strong>! Your order has been placed and a confirmation receipt has been sent to <strong>${customerEmail}</strong>. Please complete your payment below to confirm your order — include your name in the payment note.`;
 
   document.getElementById('success-payment-note').innerHTML =
     `Send <strong>${fmt(total)}</strong> and include your name <strong>"${customerName}"</strong> in the note.`;
