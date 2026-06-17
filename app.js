@@ -29,14 +29,12 @@ function isSoldOut()       { return slotsRemaining() <= 0; }
    HERO IMAGE STRIPS — all cookie photos for cycling
    ---------------------------------------------------------- */
 const HERO_IMAGES = [
-  'images/fd_topper_super_dad.jpg',
-  'images/fd_topper_fathers_day.jpg',
-  'images/fd_topper_marines.jpg',
-  'images/fd_rounds_placeholder.jpg',
-  'images/fd_topper_super_dad.jpg',
-  'images/fd_topper_fathers_day.jpg',
-  'images/fd_topper_marines.jpg',
-  'images/fd_rounds_placeholder.jpg',
+  'images/fd_topper_super_dad.png',
+  'images/fd_topper_fathers_day.png',
+  'images/fd_topper_marines.png',
+  'images/fd_topper_super_dad.png',
+  'images/fd_topper_fathers_day.png',
+  'images/fd_topper_marines.png',
 ];
 
 /* ----------------------------------------------------------
@@ -49,7 +47,7 @@ const PRODUCTS = [
     name: '6\" Round — Super Dad',
     section: "Father's Day",
     desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and the "Super Dad" topper. Perfect for any superhero dad.',
-    imageSrc: 'images/fd_topper_super_dad.jpg',
+    imageSrc: 'images/fd_topper_super_dad.png',
     price: 15,
     slots: 1,
   },
@@ -58,7 +56,7 @@ const PRODUCTS = [
     name: '6\" Round — Happy Father\'s Day',
     section: "Father's Day",
     desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and a "Happy Father\'s Day" crown topper.',
-    imageSrc: 'images/fd_topper_fathers_day.jpg',
+    imageSrc: 'images/fd_topper_fathers_day.png',
     price: 15,
     slots: 1,
   },
@@ -67,7 +65,7 @@ const PRODUCTS = [
     name: '6\" Round — Marines Edition',
     section: "Father's Day",
     desc: 'A giant 6-inch chocolate chip cookie with chocolate frosting and a Marine Corps "Happy Father\'s Day" topper. For the dads who served.',
-    imageSrc: 'images/fd_topper_marines.jpg',
+    imageSrc: 'images/fd_topper_marines.png',
     price: 15,
     slots: 1,
   },
@@ -111,7 +109,7 @@ function showToast(msg) {
 }
 
 function topperLabel(section) {
-  return section === "Mother's Day" ? 'Happy Mother\'s Day Topper' : 'Best Teacher Ever Topper';
+  return 'Happy Father\'s Day Topper';
 }
 
 /* ----------------------------------------------------------
@@ -192,28 +190,9 @@ function renderCookieGrid() {
   const heading = document.getElementById('grid-heading');
   const sub     = document.getElementById('grid-sub');
 
-  /* Graduation coming soon */
-  if (state.filter === 'Graduation') {
-    heading.textContent = 'Graduation';
-    sub.textContent = '';
-    grid.innerHTML = `
-      <div class="coming-soon-card">
-        <div class="coming-soon-icon">🎓</div>
-        <h3>Coming Soon!</h3>
-        <p>Graduation cookies are on their way. Check back shortly — we'll have special options available for your grad!</p>
-      </div>`;
-    return;
-  }
+  const filtered = PRODUCTS;
 
-  const filtered = state.filter === 'All'
-    ? PRODUCTS
-    : PRODUCTS.filter(p => p.section === state.filter);
-
-  heading.textContent = state.filter === 'All'
-    ? 'All Cookies'
-    : state.filter === "Mother's Day"
-      ? "Mother's Day 2026"
-      : 'Teacher Appreciation Week';
+  heading.textContent = "Father's Day Cookies";
 
   sub.textContent = 'Made from scratch · Packaged in bakery boxes · Local pickup';
 
