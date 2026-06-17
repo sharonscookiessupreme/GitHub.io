@@ -413,12 +413,10 @@ function renderModal() {
   document.getElementById('qty-minus').addEventListener('click', () => changeQty(-1));
   document.getElementById('qty-plus').addEventListener('click',  () => changeQty(1));
 
-  closeModal();
-  renderCart();
-  renderCookieGrid();
-  updateInventoryBanner();
-  showToast(`${p.name} added to cart! 🍪`);
-  openCart();
+  document.querySelectorAll('input[name="pickup"]').forEach(r =>
+    r.addEventListener('change', e => { state.modalForm.pickupTime = e.target.value; }));
+
+  document.getElementById('modal-confirm').addEventListener('click', addToCart);
 }
 
 function initModal() {
@@ -436,7 +434,56 @@ function initModal() {
 /* ----------------------------------------------------------
    ORDER PLACEMENT & SUCCESS
    ---------------------------------------------------------- */
-function placeOrder() {
+function changeQty(delta) {
+  const p = state.activeModal;
+  if (!p) return;
+  const rem    = slotsRemaining();
+  const maxQty = Math.max(1, Math.min(10, Math.floor(rem / p.slots)));
+  state.modalForm.qty = Math.max(1, Math.min(maxQty, state.modalForm.qty + delta));
+  const d = document.getElementById('qty-display');
+  if (d) d.textContent = state.modalForm.qty;
+  const t = document.getElementById('modal-total-display');
+  if (t) t.textContent = fmt(p.price * state.modalForm.qty);
+}
+
+function addToCart() {
+  const p = state.activeModal;
+  const { name, email, qty, note } = state.modalForm;
+  const pickupTime = state.modalForm.pickupTime;
+
+  if (!name.trim())  { showToast('Please enter your name');  document.getElementById('modal-name').focus();  return; }
+  if (!email.trim() || !email.includes('@')) { showToast('Please enter a valid email'); document.getElementById('modal-email').focus(); return; }
+
+  const slotsNeeded = p.slots * qty;
+  if (slotsNeeded > slotsRemaining()) {
+    showToast('Not enough slots remaining — reduce quantity'); return;
+  }
+
+  slotsUsed += slotsNeeded;
+
+  state.cart.push({
+    productId: p.id,
+    name:      p.name,
+    section:   p.section,
+    price:     p.price,
+    slots:     p.slots,
+    qty,
+    note,
+    pickupTime,
+    customerName:  name,
+    customerEmail: email,
+    lineTotal: p.price * qty,
+  });
+
+  closeModal();
+  renderCart();
+  renderCookieGrid();
+  updateInventoryBanner();
+  showToast(`${p.name} added to cart! 🍪`);
+  openCart();
+}
+
+
   if (state.cart.length === 0) return;
 
   const customerName  = state.cart[0].customerName  || 'Friend';
