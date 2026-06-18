@@ -11,8 +11,8 @@ const SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyV1dnJ5nFgW
    PICKUP TIMES
    ---------------------------------------------------------- */
 const PICKUP_TIMES = [
-  'Friday June 20th, 5:00pm – 8:00pm',
-  'Saturday June 21st, 10:00am – 2:00pm',
+  'Friday June 19th, 5:00pm – 8:00pm',
+  'Saturday June 20th, 10:00am – 2:00pm',
 ];
 
 /* ----------------------------------------------------------
