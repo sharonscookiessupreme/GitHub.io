@@ -360,7 +360,7 @@ function renderCart() {
             <option value="${t}" ${state.buyerInfo.pickupTime === t ? 'selected' : ''}>${t}</option>
           `).join('')}
         </select>
-        <div class="pickup-address">📍 404 Lake Road, Havelock NC 28532</div>
+        <div class="pickup-address">📍 Address sent via Email</div>
       </div>
     </div>`;
 
