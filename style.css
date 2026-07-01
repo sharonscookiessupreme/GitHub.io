@@ -1557,3 +1557,103 @@ footer {
   background: white;
   transform: scale(1.3);
 }
+
+/* ============================================================
+   TOPPER GRID (visual selection with preview images)
+   ============================================================ */
+.topper-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+@media (max-width: 480px) {
+  .topper-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.topper-option {
+  position: relative;
+  cursor: pointer;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  background: var(--cream-light);
+  transition: border-color 0.15s, transform 0.1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.topper-option:hover {
+  border-color: var(--pink);
+  transform: translateY(-1px);
+}
+.topper-option.selected {
+  border-color: var(--pink);
+  background: var(--pink-light, #FDF0F5);
+  box-shadow: 0 0 0 3px rgba(224, 95, 156, 0.15);
+}
+.topper-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.topper-preview {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 6px;
+  background: white;
+}
+.topper-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--brown);
+  margin-top: 6px;
+  line-height: 1.2;
+}
+
+/* ============================================================
+   CART BUYER INFO SECTION
+   ============================================================ */
+.cart-buyer-info {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  border-top: 2px solid var(--pink);
+}
+.cart-buyer-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brown);
+  margin-bottom: 12px;
+}
+.cart-buyer-info .form-group {
+  margin-bottom: 12px;
+}
+.cart-buyer-info .form-group:last-child {
+  margin-bottom: 0;
+}
+.cart-buyer-info label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--light-brown);
+  display: block;
+  margin-bottom: 4px;
+}
+.cart-buyer-info input,
+.cart-buyer-info select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: white;
+}
+.cart-buyer-info input:focus,
+.cart-buyer-info select:focus {
+  outline: none;
+  border-color: var(--pink);
+}

@@ -56,11 +56,11 @@ const HERO_IMAGES = [
    slots: how many inventory slots each unit costs
    ---------------------------------------------------------- */
 const TOPPER_OPTIONS = [
-  { id: 'happy4th',     label: 'Happy 4th' },
-  { id: '250numbers',   label: '250 (numbers)' },
-  { id: 'usa250num',    label: 'USA 250 (numbers)' },
-  { id: 'usa_country',  label: 'USA 250 (country)' },
-  { id: 'none',         label: 'No topper' },
+  { id: 'happy4th',     label: 'Happy 4th',    preview: 'images/july4_classic_1.jpg' },
+  { id: '250numbers',   label: 'TwoFiveZero!', preview: 'images/july4_classic_2.jpg' },
+  { id: 'usa250num',    label: 'USA 250',      preview: 'images/july4_classic_3.jpg' },
+  { id: 'usa_country',  label: '250 Country',  preview: 'images/july4_classic_5.jpg' },
+  { id: 'none',         label: 'No topper',    preview: 'images/july4_classic_10.jpg' },
 ];
 
 const PRODUCTS = [
@@ -126,13 +126,15 @@ let state = {
   cartOpen: false,
   activeModal: null,
   modalForm: {
-    name: '', email: '', phone: '',
     qty: 1,
     topper: 'happy4th',
     frosting: 'yes',
     note: '',
-    pickupTime: PICKUP_TIMES[0],
     imgIndex: 0
+  },
+  buyerInfo: {
+    name: '', email: '', phone: '',
+    pickupTime: PICKUP_TIMES[0]
   },
   orderSuccess: null,
 };
@@ -318,7 +320,7 @@ function renderCart() {
   footerEl.classList.remove('hidden');
   totalEl.textContent = fmt(cartTotal());
 
-  itemsEl.innerHTML = state.cart.map((item, i) => {
+  const itemsHtml = state.cart.map((item, i) => {
     const opts = [
       item.topper !== 'none' ? item.topperLabel : 'No topper',
       item.frosting === 'yes' ? 'RWB frosting border' : 'No frosting'
@@ -330,16 +332,53 @@ function renderCart() {
           <div class="cart-item-name">${item.name}</div>
           <div class="cart-item-meta">${item.section} · Qty: ${item.qty}</div>
           <div class="cart-item-meta">🎆 ${opts}</div>
-          <div class="cart-item-meta">📅 ${item.pickupTime}</div>
           <div class="cart-item-price">${fmt(item.lineTotal)}</div>
         </div>
         <button class="cart-remove" data-index="${i}" >✕</button>
       </div>`;
   }).join('');
 
+  const buyerInfoHtml = `
+    <div class="cart-buyer-info">
+      <div class="cart-buyer-title">Your Info</div>
+      <div class="form-group">
+        <label for="cart-name">Full name</label>
+        <input type="text" id="cart-name" placeholder="Full name" value="${state.buyerInfo.name}" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label for="cart-email">Email address</label>
+        <input type="email" id="cart-email" placeholder="you@email.com" value="${state.buyerInfo.email}" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="cart-phone">Phone number</label>
+        <input type="tel" id="cart-phone" placeholder="(555) 555-5555" value="${state.buyerInfo.phone}" autocomplete="tel">
+      </div>
+      <div class="form-group">
+        <label for="cart-pickup">📅 Pickup time</label>
+        <select id="cart-pickup" class="modal-select">
+          ${PICKUP_TIMES.map(t => `
+            <option value="${t}" ${state.buyerInfo.pickupTime === t ? 'selected' : ''}>${t}</option>
+          `).join('')}
+        </select>
+        <div class="pickup-address">📍 404 Lake Road, Havelock NC 28532</div>
+      </div>
+    </div>`;
+
+  itemsEl.innerHTML = itemsHtml + buyerInfoHtml;
+
   itemsEl.querySelectorAll('.cart-remove').forEach(btn => {
     btn.addEventListener('click', () => removeCartItem(parseInt(btn.dataset.index)));
   });
+
+  /* Bind buyer info fields */
+  const nameEl = document.getElementById('cart-name');
+  const emailEl = document.getElementById('cart-email');
+  const phoneEl = document.getElementById('cart-phone');
+  const pickupEl = document.getElementById('cart-pickup');
+  if (nameEl)   nameEl.addEventListener('input',  e => { state.buyerInfo.name  = e.target.value; });
+  if (emailEl)  emailEl.addEventListener('input', e => { state.buyerInfo.email = e.target.value; });
+  if (phoneEl)  phoneEl.addEventListener('input', e => { state.buyerInfo.phone = e.target.value; });
+  if (pickupEl) pickupEl.addEventListener('change', e => { state.buyerInfo.pickupTime = e.target.value; });
 }
 
 function removeCartItem(index) {
@@ -380,7 +419,7 @@ function openModal(productId) {
   const product = PRODUCTS.find(p => p.id === productId);
   if (!product) return;
   state.activeModal = product;
-  state.modalForm   = { name: '', email: '', phone: '', qty: 1, topper: 'happy4th', frosting: 'yes', note: '', pickupTime: PICKUP_TIMES[0], imgIndex: 0 };
+  state.modalForm   = { qty: 1, topper: 'happy4th', frosting: 'yes', note: '', imgIndex: 0 };
   renderModal();
   document.getElementById('modal-overlay').classList.remove('hidden');
   setTimeout(() => document.getElementById('modal-name') && document.getElementById('modal-name').focus(), 50);
@@ -416,19 +455,6 @@ function renderModal() {
     </div>
 
     <div class="form-group">
-      <label for="modal-name">Your name</label>
-      <input type="text" id="modal-name" placeholder="Full name" value="${state.modalForm.name}" autocomplete="name">
-    </div>
-    <div class="form-group">
-      <label for="modal-email">Email address</label>
-      <input type="email" id="modal-email" placeholder="you@email.com" value="${state.modalForm.email}" autocomplete="email">
-    </div>
-    <div class="form-group">
-      <label for="modal-phone">Phone number</label>
-      <input type="tel" id="modal-phone" placeholder="(555) 555-5555" value="${state.modalForm.phone}" autocomplete="tel">
-    </div>
-
-    <div class="form-group">
       <label>Quantity <span class="label-hint">(max ${maxQty})</span></label>
       <div class="qty-control">
         <button class="qty-btn" id="qty-minus" >−</button>
@@ -438,12 +464,16 @@ function renderModal() {
     </div>
 
     <div class="form-group">
-      <label for="modal-topper">🎆 Topper choice</label>
-      <select id="modal-topper" class="modal-select">
+      <label>🎆 Topper choice</label>
+      <div class="topper-grid">
         ${TOPPER_OPTIONS.map(t => `
-          <option value="${t.id}" ${state.modalForm.topper === t.id ? 'selected' : ''}>${t.label}</option>
+          <label class="topper-option ${state.modalForm.topper === t.id ? 'selected' : ''}">
+            <input type="radio" name="topper" value="${t.id}" ${state.modalForm.topper === t.id ? 'checked' : ''}>
+            <img class="topper-preview" src="${t.preview}" alt="${t.label}" draggable="false">
+            <span class="topper-label">${t.label}</span>
+          </label>
         `).join('')}
-      </select>
+      </div>
       <div class="pickup-address">Fireworks decorations included with all cookies (unless "No topper" is selected).</div>
     </div>
 
@@ -457,17 +487,7 @@ function renderModal() {
 
     <div class="form-group">
       <label for="modal-note">Special note <span class="label-hint">(optional)</span></label>
-      <textarea id="modal-note" placeholder="Any special requests...">${state.modalForm.note}</textarea>
-    </div>
-
-    <div class="form-group">
-      <label for="modal-pickup">📅 Pickup time</label>
-      <select id="modal-pickup" class="modal-select">
-        ${PICKUP_TIMES.map(t => `
-          <option value="${t}" ${state.modalForm.pickupTime === t ? 'selected' : ''}>${t}</option>
-        `).join('')}
-      </select>
-      <div class="pickup-address">📍 404 Lake Road, Havelock NC 28532</div>
+      <textarea id="modal-note" placeholder="Any special requests for this cookie...">${state.modalForm.note}</textarea>
     </div>
 
     <div class="modal-total">
@@ -482,14 +502,18 @@ function renderModal() {
   /* Bind events */
   document.getElementById('modal-cancel').addEventListener('click', closeModal);
   document.getElementById('modal-close').addEventListener('click', closeModal);
-  document.getElementById('modal-name').addEventListener('input',  e => { state.modalForm.name  = e.target.value; });
-  document.getElementById('modal-email').addEventListener('input', e => { state.modalForm.email = e.target.value; });
-  document.getElementById('modal-phone').addEventListener('input', e => { state.modalForm.phone = e.target.value; });
   document.getElementById('modal-note').addEventListener('input',  e => { state.modalForm.note  = e.target.value; });
-  document.getElementById('modal-topper').addEventListener('change', e => { state.modalForm.topper = e.target.value; });
-  document.getElementById('modal-pickup').addEventListener('change', e => { state.modalForm.pickupTime = e.target.value; });
   document.getElementById('qty-minus').addEventListener('click', () => changeQty(-1));
   document.getElementById('qty-plus').addEventListener('click',  () => changeQty(1));
+
+  document.querySelectorAll('input[name="topper"]').forEach(r =>
+    r.addEventListener('change', e => {
+      state.modalForm.topper = e.target.value;
+      document.querySelectorAll('.topper-option').forEach(opt => {
+        const input = opt.querySelector('input[name="topper"]');
+        opt.classList.toggle('selected', input && input.value === e.target.value);
+      });
+    }));
 
   document.querySelectorAll('input[name="frosting"]').forEach(r =>
     r.addEventListener('change', e => { state.modalForm.frosting = e.target.value; }));
@@ -553,12 +577,7 @@ function changeQty(delta) {
 
 function addToCart() {
   const p = state.activeModal;
-  const { name, email, phone, qty, topper, frosting, note } = state.modalForm;
-  const pickupTime = state.modalForm.pickupTime;
-
-  if (!name.trim())  { showToast('Please enter your name');  document.getElementById('modal-name').focus();  return; }
-  if (!email.trim() || !email.includes('@')) { showToast('Please enter a valid email'); document.getElementById('modal-email').focus(); return; }
-  if (!phone.trim() || phone.replace(/\D/g,'').length < 10) { showToast('Please enter a valid phone number'); document.getElementById('modal-phone').focus(); return; }
+  const { qty, topper, frosting, note } = state.modalForm;
 
   const slotsNeeded = p.slots * qty;
   if (slotsNeeded > slotsRemaining()) {
@@ -580,10 +599,6 @@ function addToCart() {
     topperLabel,
     frosting,
     note,
-    pickupTime,
-    customerName:  name,
-    customerEmail: email,
-    customerPhone: phone,
     lineTotal: p.price * qty,
   });
 
@@ -598,14 +613,34 @@ function addToCart() {
 function placeOrder() {
   if (state.cart.length === 0) return;
 
-  const customerName  = state.cart[0].customerName  || 'Friend';
-  const customerEmail = state.cart[0].customerEmail || '';
-  const customerPhone = state.cart[0].customerPhone || '';
+  /* Validate buyer info entered in the cart */
+  const { name, email, phone, pickupTime } = state.buyerInfo;
+  if (!name.trim()) {
+    showToast('Please enter your name');
+    const el = document.getElementById('cart-name'); if (el) el.focus();
+    return;
+  }
+  if (!email.trim() || !email.includes('@')) {
+    showToast('Please enter a valid email');
+    const el = document.getElementById('cart-email'); if (el) el.focus();
+    return;
+  }
+  if (!phone.trim() || phone.replace(/\D/g,'').length < 10) {
+    showToast('Please enter a valid phone number');
+    const el = document.getElementById('cart-phone'); if (el) el.focus();
+    return;
+  }
+
+  const customerName  = name;
+  const customerEmail = email;
+  const customerPhone = phone;
   const total = cartTotal();
   const items = [...state.cart];
 
-  state.orderSuccess = { customerName, customerEmail, customerPhone, total, items };
+  state.orderSuccess = { customerName, customerEmail, customerPhone, total, items, pickupTime };
   state.cart = [];
+  /* Reset buyer info for next order */
+  state.buyerInfo = { name: '', email: '', phone: '', pickupTime: PICKUP_TIMES[0] };
   closeCart();
   renderCart();
   renderCookieGrid();
@@ -613,12 +648,11 @@ function placeOrder() {
   renderSuccessScreen();
   document.getElementById('success-screen').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  submitOrderToSheets({ customerName, customerEmail, customerPhone, total, items });
+  submitOrderToSheets({ customerName, customerEmail, customerPhone, total, items, pickupTime });
 }
 
 function renderSuccessScreen() {
-  const { customerName, customerEmail, total, items } = state.orderSuccess;
-  const pickupTime = items[0] && items[0].pickupTime ? items[0].pickupTime : '';
+  const { customerName, customerEmail, total, items, pickupTime } = state.orderSuccess;
 
   document.getElementById('success-message').innerHTML =
     `Thank you, <strong>${customerName}</strong>! Your order has been placed and a confirmation receipt has been sent to <strong>${customerEmail}</strong>. Please complete your payment below to confirm your order — include your name in the payment note.`;
@@ -673,7 +707,7 @@ function renderSuccessScreen() {
 /* ----------------------------------------------------------
    GOOGLE SHEETS SUBMISSION
    ---------------------------------------------------------- */
-function submitOrderToSheets({ customerName, customerEmail, customerPhone, total, items }) {
+function submitOrderToSheets({ customerName, customerEmail, customerPhone, total, items, pickupTime }) {
   if (!SHEETS_WEBHOOK_URL) return;
 
   const orderDate = new Date().toLocaleString('en-US', {
@@ -688,8 +722,6 @@ function submitOrderToSheets({ customerName, customerEmail, customerPhone, total
     ].join(' + ');
     return `${i.name} x${i.qty} (${opts})`;
   }).join(', ');
-
-  const pickupTime = items[0] && items[0].pickupTime ? items[0].pickupTime : '';
 
   const params = new URLSearchParams({
     date:     orderDate,
