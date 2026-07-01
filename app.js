@@ -66,7 +66,7 @@ const TOPPER_OPTIONS = [
 const PRODUCTS = [
   {
     id: 'july4-trios',
-    name: "Trios",
+    name: 'Trios',
     section: "July 4th",
     desc: 'Three individual chocolate chip cookies with fireworks decorations. Perfect for sharing. Choose your topper below.',
     imageSrc: 'images/july4_trios_2.jpg',
@@ -360,7 +360,7 @@ function renderCart() {
             <option value="${t}" ${state.buyerInfo.pickupTime === t ? 'selected' : ''}>${t}</option>
           `).join('')}
         </select>
-        <div class="pickup-address">📍 Address sent via Email</div>
+        <div class="pickup-address">📍 Address sent via email after order</div>
       </div>
     </div>`;
 
@@ -469,7 +469,9 @@ function renderModal() {
         ${TOPPER_OPTIONS.map(t => `
           <label class="topper-option ${state.modalForm.topper === t.id ? 'selected' : ''}">
             <input type="radio" name="topper" value="${t.id}" ${state.modalForm.topper === t.id ? 'checked' : ''}>
-            <img class="topper-preview" src="${t.preview}" alt="${t.label}" draggable="false">
+            ${t.preview
+              ? `<img class="topper-preview" src="${t.preview}" alt="${t.label}" draggable="false">`
+              : `<div class="topper-preview topper-none">🚫</div>`}
             <span class="topper-label">${t.label}</span>
           </label>
         `).join('')}
@@ -675,7 +677,7 @@ function renderSuccessScreen() {
     <div class="success-detail-title">Order Summary</div>
     ${rows}
     <div class="success-row"><span>Total</span><span>${fmt(total)}</span></div>
-    ${pickupTime ? `<div class="success-pickup-row">📅 <strong>Pickup:</strong> ${pickupTime}<br>Address sent via Email</div>` : ''}`;
+    ${pickupTime ? `<div class="success-pickup-row">📅 <strong>Pickup:</strong> ${pickupTime}<br>📍 Address sent via email</div>` : ''}`;
 
   document.getElementById('success-payment-grid').innerHTML = `
     <div class="pay-card">
@@ -692,7 +694,7 @@ function renderSuccessScreen() {
     </div>
     <div class="pay-card">
       <div class="pay-icon">💰</div>
-      <div class="pay-name">Cash</div>
+      <div class="pay-name">Check / Cash</div>
       <div class="pay-handle">Email to arrange</div>
       <a href="mailto:sharonscookiessupreme@gmail.com?subject=Cookie Order - ${encodeURIComponent(customerName)}&body=Hi! I placed an order for ${fmt(total)}. My name is ${encodeURIComponent(customerName)}." class="pay-link">Email us</a>
     </div>`;
