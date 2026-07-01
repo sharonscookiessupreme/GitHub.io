@@ -692,7 +692,7 @@ function renderSuccessScreen() {
     </div>
     <div class="pay-card">
       <div class="pay-icon">💰</div>
-      <div class="pay-name">Check / Cash</div>
+      <div class="pay-name">Cash</div>
       <div class="pay-handle">Email to arrange</div>
       <a href="mailto:sharonscookiessupreme@gmail.com?subject=Cookie Order - ${encodeURIComponent(customerName)}&body=Hi! I placed an order for ${fmt(total)}. My name is ${encodeURIComponent(customerName)}." class="pay-link">Email us</a>
     </div>`;
