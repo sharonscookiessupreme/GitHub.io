@@ -675,7 +675,7 @@ function renderSuccessScreen() {
     <div class="success-detail-title">Order Summary</div>
     ${rows}
     <div class="success-row"><span>Total</span><span>${fmt(total)}</span></div>
-    ${pickupTime ? `<div class="success-pickup-row">📅 <strong>Pickup:</strong> ${pickupTime}<br>📍 404 Lake Road, Havelock NC 28532</div>` : ''}`;
+    ${pickupTime ? `<div class="success-pickup-row">📅 <strong>Pickup:</strong> ${pickupTime}<br>Address sent via Email</div>` : ''}`;
 
   document.getElementById('success-payment-grid').innerHTML = `
     <div class="pay-card">
