@@ -66,7 +66,7 @@ const TOPPER_OPTIONS = [
 const PRODUCTS = [
   {
     id: 'july4-trios',
-    name: "Trio\'s",
+    name: "Trios",
     section: "July 4th",
     desc: 'Three individual chocolate chip cookies with fireworks decorations. Perfect for sharing. Choose your topper below.',
     imageSrc: 'images/july4_trios_2.jpg',
@@ -97,7 +97,7 @@ const PRODUCTS = [
       'images/july4_classic_9.jpg',
       'images/july4_classic_10.jpg',
     ],
-    price: 20,
+    price: 15,
     slots: 1,
   },
   {
@@ -112,7 +112,7 @@ const PRODUCTS = [
       'images/july4_party_3.jpg',
       'images/july4_party_4.jpg',
     ],
-    price: 50,
+    price: 60,
     slots: 4,
   },
 ];
