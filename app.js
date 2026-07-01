@@ -60,7 +60,7 @@ const TOPPER_OPTIONS = [
   { id: '250numbers',   label: 'TwoFiveZero!', preview: 'images/july4_classic_2.jpg' },
   { id: 'usa250num',    label: 'USA 250',      preview: 'images/july4_classic_3.jpg' },
   { id: 'usa_country',  label: '250 Country',  preview: 'images/july4_classic_5.jpg' },
-  { id: 'none',         label: 'No topper',    preview: null },
+  { id: 'none',         label: 'No topper',    preview: 'images/july4_classic_10.jpg' },
 ];
 
 const PRODUCTS = [
@@ -469,9 +469,7 @@ function renderModal() {
         ${TOPPER_OPTIONS.map(t => `
           <label class="topper-option ${state.modalForm.topper === t.id ? 'selected' : ''}">
             <input type="radio" name="topper" value="${t.id}" ${state.modalForm.topper === t.id ? 'checked' : ''}>
-            ${t.preview
-              ? `<img class="topper-preview" src="${t.preview}" alt="${t.label}" draggable="false">`
-              : `<div class="topper-preview topper-none">🚫</div>`}
+            <img class="topper-preview" src="${t.preview}" alt="${t.label}" draggable="false">
             <span class="topper-label">${t.label}</span>
           </label>
         `).join('')}

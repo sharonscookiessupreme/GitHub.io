@@ -1657,14 +1657,3 @@ footer {
   outline: none;
   border-color: var(--pink);
 }
-
-/* No topper placeholder */
-.topper-none {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  background: var(--cream) !important;
-  font-size: 1.5rem;
-  color: var(--light-brown);
-  opacity: 0.6;
-}
